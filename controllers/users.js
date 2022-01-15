@@ -1,7 +1,9 @@
+const User = require('../models/users')
 
-
-const userRegister = (req, res) => {
-  res.status(200).json({msg:"User added"})
+const userRegister = async (req, res) => {
+  const user = await User.create({...req.body})
+  res.status(200).json(req.body)
+  
 }
 
 const collaboratorRegister = (req, res) => {
