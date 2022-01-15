@@ -13,7 +13,7 @@ app.use('/', userRoutes);
 
 const start = async () => {
   try {
-    //await connectDb('mongodb+srv://LauraCanon:Makeitreal@cluster0.vrmch.mongodb.net/users?retryWrites=true&w=majority');
+    await connectDb(process.env.MONGO_URI);
     console.log('Conected to DB')
     app.listen(port, () => console.log(`Listening on port ${port}`))
   } catch (error) {
