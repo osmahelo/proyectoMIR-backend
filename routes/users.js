@@ -3,7 +3,7 @@ const router = express.Router();
 const {userRegister, collaboratorRegister} = require('../controllers/users')
 
 //Ruta registro Usuario
-router.route('/registration').get(userRegister)
+router.route('/registration').post(userRegister)
 
 //Ruta registro Colaborador
 router.route('/addinfo').post(collaboratorRegister)
