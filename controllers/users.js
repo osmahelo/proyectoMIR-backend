@@ -20,9 +20,10 @@ const sessionLogin = async (req, res) => {
   const user = await User.findOne({email})
   const collaborator = await Collaborator.findOne({email})
   if (user || collaborator) {
-    res.json({ email });
+    res.status(201).json({ email });
   }
-  else(res.json('not found')) 
+  else(
+    res.status(401).json('not found')) 
 
 }
 

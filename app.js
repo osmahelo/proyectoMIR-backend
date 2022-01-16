@@ -8,9 +8,7 @@ const port = process.env.port || 3001;
 
 //middleware
 app.use(express.json());
-// app.get('/', (req, res) => {
-//   res.send('Hello')
-// })
+
 app.use('/', userRoutes);
 
 const start = async () => {
