@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const {userRegister, collaboratorRegister} = require('../controllers/users')
+const {userRegister, collaboratorRegister, sessionLogin} = require('../controllers/users')
 
 //Ruta registro Usuario
-router.route('/registration').post(userRegister)
+router.route('/useregister').post(userRegister)
 
 //Ruta registro Colaborador
-router.route('/addinfo').post(collaboratorRegister)
+router.route('/collabregister').post(collaboratorRegister)
 
 //Ruta login user/collaborator
-router.route('sessionlogin').post()
+router.route('/sessionlogin').post(sessionLogin)
 
 module.exports = router;
