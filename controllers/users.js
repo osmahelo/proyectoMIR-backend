@@ -19,17 +19,10 @@ const sessionLogin = async (req, res) => {
   const {email, password} = req.body;
   const user = await User.findOne({email})
   const collaborator = await Collaborator.findOne({email})
-  if(!user) {
-    return res.status(500).json({msg: "No user found"})
-  } else {
-    return res.status(201).json({user}) 
+  if (user || collaborator) {
+    res.json({ email });
   }
-  if(!collaborator) {
-    return res.status(500).json({msg: "No collaborator found"})
-  } else {
-    return res.status(201).json({collaborator})
-  }
-  
+  else(res.json('not found')) 
 
 }
 
