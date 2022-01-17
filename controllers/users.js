@@ -37,14 +37,14 @@ const userLogin = async (req, res) => {
   if(user){
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new UnauthenticatedError("invalid credentials");
+      throw new UnauthenticatedError("invalid password");
     }
     res.status(StatusCodes.OK).json({ user});
   }
   if(collaborator){
     const isPasswordCorrectColab = await collaborator.comparePassword(password);
     if (!isPasswordCorrectColab) {
-      return res.status(400).json({ msg: "invalid credentials" });
+      return res.status(400).json({ msg: "invalid password" });
     }
     res.status(200).json({collaborator});
 
