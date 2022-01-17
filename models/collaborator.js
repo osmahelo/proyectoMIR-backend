@@ -1,3 +1,4 @@
+const bcryptjs = require('bcryptjs');
 const mongoose = require('mongoose');
 
 const collaboratorSchema = new mongoose.Schema({
@@ -11,5 +12,15 @@ const collaboratorSchema = new mongoose.Schema({
   image: {type:String, required:false},
   createdAt: {type:Date, default: Date.now()},
 })
+
+collaboratorSchema.pre("save", async function(){
+  const salt = await bcryptjs.genSalt(10);
+  this.password = await bcryptjs.hash(this.password, salt);
+})
+
+collaboratorSchema.methods.comparePassword = async function(passwordCheck){
+  const isMatch = await bcryptjs.compare(passwordCheck, this.password);
+  return isMatch
+}
 
 module.exports = mongoose.model('Collaborator', collaboratorSchema)

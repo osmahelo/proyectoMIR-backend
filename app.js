@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const userRoutes = require('./routes/users')
 const connectDb = require('./db/db')
+const {errorHandlerMiddleware, showErrors} = require('./middleware/errorHandlerMiddleware')
 
 const app = express();
 const port = process.env.port || 3001;
@@ -12,6 +13,8 @@ app.use(express.json());
 //   res.send('Hello')
 // })
 app.use('/', userRoutes);
+app.use(errorHandlerMiddleware)
+app.use(showErrors)
 
 const start = async () => {
   try {

@@ -1,3 +1,4 @@
+const bcryptjs = require('bcryptjs');
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -12,5 +13,15 @@ const userSchema = new mongoose.Schema({
   createdAt: {type:Date, default: Date.now()},
 })
 
+//Encriptación password
+userSchema.pre("save", async function(){
+  const salt = await bcryptjs.genSalt(10);
+  this.password = await bcryptjs.hash(this.password, salt);
+})
+
+userSchema.methods.comparePassword = async function(passwordCheck){
+  const isMatch = await bcryptjs.compare(passwordCheck, this.password);
+  return isMatch
+}
 
 module.exports = mongoose.model('User', userSchema)
