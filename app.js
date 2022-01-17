@@ -11,6 +11,11 @@ app.use(express.json());
 
 app.use('/', userRoutes);
 
+const notFoundMiddleware = require("./middleware/notfound");
+const errorHandlerMiddleware = require("./middleware/errorhandler");
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
+
 const start = async () => {
   try {
     await connectDb('mongodb+srv://LauraCanon:Makeitreal@cluster0.vrmch.mongodb.net/users?retryWrites=true&w=majority');

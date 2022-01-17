@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bycrypt = require("bcryptjs");
 
 const collaboratorSchema = new mongoose.Schema({
   name: {type:String, required:[true, "Name is required"], minlength:4},
@@ -11,5 +12,15 @@ const collaboratorSchema = new mongoose.Schema({
   image: {type:String, required:false},
   createdAt: {type:Date, default: Date.now()},
 })
+
+collaboratorSchema.pre("save", async function () {
+  const salt = await bycrypt.genSalt(10);
+  this.password = await bycrypt.hash(this.password, salt);
+});
+
+collaboratorSchema.methods.comparePassword = async function (passwordcheck) {
+  const isMatch = await bycrypt.compare(passwordcheck, this.password);
+  return isMatch;
+};
 
 module.exports = mongoose.model('Collaborator', collaboratorSchema)
