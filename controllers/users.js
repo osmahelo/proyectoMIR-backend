@@ -1,7 +1,7 @@
 const User = require('../models/users')
 const Collaborator = require('../models/collaborator')
 const { StatusCodes } = require("http-status-codes");
-const BadRequestError = require('../errors/bad-request')
+const {BadRequestError,UnauthenticatedError} = require('../errors')
 
 
 //Creación de usuario
@@ -30,34 +30,28 @@ const userLogin = async (req, res) => {
      throw new BadRequestError("Please provide email and password");
   }
   const user = await User.findOne({ email });
-  if (!user) {
-    throw new UnauthenticatedError("invalid credentials");
-  }
-  //compare password
-  const isPasswordCorrect = await user.comparePassword(password);
-  if (!isPasswordCorrect) {
-    throw new UnauthenticatedError("invalid credentials");
-  }
-  res.status(StatusCodes.OK).json({ user});
-};
-
-const colabLogin = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ msg: "needs password and email" });
-  }
   const collaborator = await Collaborator.findOne({ email });
-  if (!collaborator) {
-    return res.status(400).json({ msg: "email does not exists" });
+  if (!user && !collaborator) {
+    throw new UnauthenticatedError("User was not found, credentials are maybe invalid");
   }
+  if(user){
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      throw new UnauthenticatedError("invalid credentials");
+    }
+    res.status(StatusCodes.OK).json({ user});
+  }
+  if(collaborator){
+    const isPasswordCorrectColab = await collaborator.comparePassword(password);
+    if (!isPasswordCorrectColab) {
+      return res.status(400).json({ msg: "invalid credentials" });
+    }
+    res.status(200).json({collaborator});
 
-  //compare password
-  const isPasswordCorrectColab = await collaborator.comparePassword(password);
-  if (!isPasswordCorrectColab) {
-    return res.status(400).json({ msg: "invalid credentials" });
   }
-  res.status(200).json({collaborator});
+  //compare password
 };
 
 
-module.exports = { userRegister, collaboratorRegister, userLogin, colabLogin };
+
+module.exports = { userRegister, collaboratorRegister, userLogin };
