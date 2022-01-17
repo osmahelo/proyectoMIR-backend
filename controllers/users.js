@@ -8,7 +8,7 @@ const BadRequestError = require('../errors/bad-request')
 const userRegister = async (req, res) => {
   const { name, email, password, lastName} = req.body;
   if(!name || !email || !password ||!lastName){
-   throw new BadRequestError('Please provide name, lastname, email, password')
+   throw new BadRequestError('Please provide name, lastname, email,password')
   }
   const user = await User.create({ ...req.body });
    res.status(StatusCodes.CREATED).json({user});
@@ -27,7 +27,7 @@ const collaboratorRegister = async (req, res) => {
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-     throw new BadRequestError('sera')
+     throw new BadRequestError("Please provide email and password");
   }
   const user = await User.findOne({ email });
   if (!user) {
@@ -38,7 +38,7 @@ const userLogin = async (req, res) => {
   if (!isPasswordCorrect) {
     throw new UnauthenticatedError("invalid credentials");
   }
-  res.status(StatusCodes.OK).json({user});
+  res.status(StatusCodes.OK).json({ user});
 };
 
 const colabLogin = async (req, res) => {
