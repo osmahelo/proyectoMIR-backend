@@ -11,6 +11,9 @@ const collaboratorSchema = new mongoose.Schema({
   address: {type:String, required:[true, "Address Name is required"]},
   phone: {type:Number, required:[true, "Phone is required"], minlength:10, maxlength:10},
   image: {type:String, required:false},
+  yearsExperiencie: {type:String, required: true},
+  certificates: {file, required:false},
+  idFile: {file, required:false},
   createdAt: {type:Date, default: Date.now()},
 })
 
