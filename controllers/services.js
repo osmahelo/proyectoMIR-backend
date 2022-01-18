@@ -1,6 +1,6 @@
 const Service = require('../models/services');
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, UnauthenticatedError } = require('../errors');
+const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
   const { description, price, city, services, createdBy } = req.body;
@@ -18,15 +18,23 @@ const GetServices = async (req, res) => {
   const { services } = req.body;
   const service = await Service.find({ services: services });
   if (!service) {
-    throw new BadRequestError('Service not found');
+    throw new NotFoundError('Service not found');
   }
   res.status(StatusCodes.OK).json({ service });
 };
+
+const GetServicesByUser = async (req, res) => {
+  // const { id: serviceId } = req.params; 
+  // console.log(req.params);
+  const service = await Service.find({createdBy: userId});
+  res.status(StatusCodes.OK).json({ service }); 
+}
+
 const UpdateService = async (req, res) => {
   const { id: serviceId } = req.params;
   const service = await Service.findOneAndUpdate({ _id: serviceId }, req.body, { new: true });
   if (!service) {
-    throw new BadRequestError('Service ID not found');
+    throw new NotFoundError('Service ID not found');
   } 
   res.status(StatusCodes.OK).json({msg:'Service Updated', service });
 };
@@ -34,7 +42,7 @@ const DeleteService = async (req, res) => {
   const { id: serviceId } = req.params;
   const service = await Service.findByIdAndDelete({ _id: serviceId });
   if (!service) {
-    throw new BadRequestError('Service ID not found, service could no be deleted');
+    throw new NotFoundError('Service ID not found, service could no be deleted');
   } 
   res.status(StatusCodes.OK).json({msg:'Service Deleted'}); 
 };
@@ -44,4 +52,5 @@ module.exports = {
   GetServices,
   UpdateService,
   DeleteService,
+  GetServicesByUser,
 };
