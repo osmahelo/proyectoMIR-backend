@@ -5,7 +5,9 @@ const { BadRequestError, UnauthenticatedError } = require('../errors');
 const CreateServices = async (req, res) => {
   const { description, price, city, services, createdBy } = req.body;
   if (!description || !price || !city || !services || !createdBy) {
-    throw new BadRequestError('Please provide name, lastname, email,password');
+    throw new BadRequestError(
+      'Please provide Service, descripction, city, price, createdBy'
+    );
   }
 
   const service = await Service.create({ ...req.body });
@@ -13,20 +15,21 @@ const CreateServices = async (req, res) => {
 };
 
 const GetServices = async (req, res) => {
-  const { service } = req.body;
-  const services = await Service.find({ service });
-  res.status(StatusCodes.CREATED).json({ services });
+  const { services } = req.body;
+  const service = await Service.find({ services: services });
+  res.status(StatusCodes.OK).json({ service });
 };
-const UpdateServices = async (req, res) => {
+const UpdateService = async (req, res) => {
+  const { id: serviceId } = req.body;
   res.status(200).json({ msg: 'Update Services' });
 };
-const DeleteServices = async (req, res) => {
+const DeleteService = async (req, res) => {
   res.status(200).json({ msg: 'Delete Services' });
 };
 
 module.exports = {
   CreateServices,
   GetServices,
-  UpdateServices,
-  DeleteServices,
+  UpdateService,
+  DeleteService,
 };
