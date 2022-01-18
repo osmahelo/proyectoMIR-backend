@@ -1,4 +1,5 @@
 require('dotenv').config();
+require("express-async-errors");
 const express = require('express');
 const userRoutes = require('./routes/users')
 const connectDb = require('./db/db')
@@ -9,12 +10,15 @@ const port = process.env.port || 3001;
 
 //middleware
 app.use(express.json());
-// app.get('/', (req, res) => {
-//   res.send('Hello')
-// })
+
 app.use('/', userRoutes);
 app.use(errorHandlerMiddleware)
 app.use(showErrors)
+
+const notFoundMiddleware = require("./middleware/notfound");
+const errorHandlerMiddleware = require("./middleware/errorhandler");
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
