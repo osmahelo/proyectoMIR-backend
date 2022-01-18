@@ -1,4 +1,4 @@
-const moongose = require("mongoose");
+const moongose = require('mongoose');
 
 const serviceSchema = new moongose.Schema({
   description: { type: String, required: true },
@@ -8,19 +8,19 @@ const serviceSchema = new moongose.Schema({
     type: String,
     enum: {
       values: [
-        "Instalación TV",
-        "Instalación Nevera",
-        "Carpintería",
-        "Plomería",
-        "Pintura de Interiores",
-        "Mantenimiento Lavadora",
-        "Jardinería",
-        "Reparación de Tuberías",
+        'Instalación TV',
+        'Instalación Nevera',
+        'Carpintería',
+        'Plomería',
+        'Pintura de Interiores',
+        'Mantenimiento Lavadora',
+        'Jardinería',
+        'Reparación de Tuberías',
       ],
-      msg: "Value is not suported",
+      msg: 'Value is not suported',
     },
-    createdBy: {type:String, required: true},
   },
+  createdBy: { type: String, required: true },
 });
 
 module.exports = moongose.model('Services', serviceSchema);
