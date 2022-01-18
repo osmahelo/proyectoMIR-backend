@@ -17,14 +17,26 @@ const CreateServices = async (req, res) => {
 const GetServices = async (req, res) => {
   const { services } = req.body;
   const service = await Service.find({ services: services });
+  if (!service) {
+    throw new BadRequestError('Service not found');
+  }
   res.status(StatusCodes.OK).json({ service });
 };
 const UpdateService = async (req, res) => {
-  const { id: serviceId } = req.body;
-  res.status(200).json({ msg: 'Update Services' });
+  const { id: serviceId } = req.params;
+  const service = await Service.findOneAndUpdate({ _id: serviceId }, req.body, { new: true });
+  if (!service) {
+    throw new BadRequestError('Service ID not found');
+  } 
+  res.status(StatusCodes.OK).json({msg:'Service Updated', service });
 };
 const DeleteService = async (req, res) => {
-  res.status(200).json({ msg: 'Delete Services' });
+  const { id: serviceId } = req.params;
+  const service = await Service.findByIdAndDelete({ _id: serviceId });
+  if (!service) {
+    throw new BadRequestError('Service ID not found, service could no be deleted');
+  } 
+  res.status(StatusCodes.OK).json({msg:'Service Deleted'}); 
 };
 
 module.exports = {
