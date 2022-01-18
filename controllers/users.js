@@ -3,7 +3,6 @@ const Collaborator = require('../models/collaborator')
 const { StatusCodes } = require("http-status-codes");
 const {BadRequestError,UnauthenticatedError} = require('../errors')
 
-
 //Creación de usuario
 const userRegister = async (req, res) => {
   const { name, email, password, lastName} = req.body;
@@ -44,14 +43,11 @@ const userLogin = async (req, res) => {
   if(collaborator){
     const isPasswordCorrectColab = await collaborator.comparePassword(password);
     if (!isPasswordCorrectColab) {
-      return res.status(400).json({ msg: "invalid password" });
+      throw new UnauthenticatedError("invalid password");
     }
     res.status(200).json({collaborator});
-
   }
-  //compare password
 };
-
 
 
 module.exports = { userRegister, collaboratorRegister, userLogin };

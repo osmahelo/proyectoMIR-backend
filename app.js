@@ -3,6 +3,7 @@ require("express-async-errors");
 const express = require('express');
 const userRoutes = require('./routes/users')
 const connectDb = require('./db/db')
+const {errorHandlerMiddleware, showErrors} = require('./middleware/errorHandlerMiddleware')
 
 const app = express();
 const port = process.env.port || 3001;
@@ -11,6 +12,8 @@ const port = process.env.port || 3001;
 app.use(express.json());
 
 app.use('/', userRoutes);
+app.use(errorHandlerMiddleware)
+app.use(showErrors)
 
 const notFoundMiddleware = require("./middleware/notfound");
 const errorHandlerMiddleware = require("./middleware/errorhandler");

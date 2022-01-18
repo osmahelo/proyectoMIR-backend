@@ -1,3 +1,4 @@
+const bcryptjs = require('bcryptjs');
 const mongoose = require('mongoose');
 const bycrypt = require("bcryptjs");
 
