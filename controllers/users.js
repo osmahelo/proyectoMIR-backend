@@ -16,7 +16,7 @@ const userRegister = async (req, res) => {
 const collaboratorRegister = async (req, res) => {
    const { name, email, password, lastName} = req.body;
   if(!name || !email || !password ||!lastName){
-   throw new BadRequestError('Please provide name, lastname, email,password')
+   throw new BadRequestError('Please provide name, lastname, email, password')
   }
   const collaborator = await Collaborator.create({...req.body})
   res.status(StatusCodes.CREATED).json({ collaborator });
@@ -31,12 +31,12 @@ const userLogin = async (req, res) => {
   const user = await User.findOne({ email });
   const collaborator = await Collaborator.findOne({ email });
   if (!user && !collaborator) {
-    throw new UnauthenticatedError("User was not found, credentials are maybe invalid");
+    throw new UnauthenticatedError("User was not found, credentials are invalid");
   }
   if(user){
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new UnauthenticatedError("invalid password");
+      throw new UnauthenticatedError("Invalid password");
     }
     res.status(StatusCodes.OK).json({ user});
   }
@@ -45,7 +45,7 @@ const userLogin = async (req, res) => {
     if (!isPasswordCorrectColab) {
       throw new UnauthenticatedError("invalid password");
     }
-    res.status(200).json({collaborator});
+    res.status(StatusCodes.OK).json({collaborator});
   }
 };
 

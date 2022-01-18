@@ -13,7 +13,7 @@ router.route('/useregister').post(userRegister)
 router.route('/collabregister').post(collaboratorRegister)
 
 //Ruta login user/collaborator
-router.route("/userlogin").post(userLogin);
+router.route("/sessionlogin").post(userLogin);
 
 
 
