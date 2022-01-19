@@ -1,12 +1,23 @@
+const jwt = require('jsonwebtoken')
 const { BadRequestError } = require('../errors');
 
-const helpers={};
-helpers.isAuthenticated =(req,res,next)=>{
-    if (req.isAuthenticated()){
-        return next()
+const auth = (req, res, next) => {
+  try {
+    const { authorization } = req.headers;
+    if( !authorization ) {
+      throw BadRequestError('Your session has expired!')
     }
-    res.redirect('/sessionlogin')
-    throw new BadRequestError('Not authorized')
-};
+    const [ bearer , token ] = authorization.split(' ');
+    if( !token ) {
+      throw BadRequestError('Your session has expired!')
+    }
+    const { id } = jwt.verify( token , 'JWTSECRET' );
+    req.user = id      
+    next();
+  }
+    catch (err) {
+    throw BadRequestError('Your session has expired!') 
+  }
+}
 
-module.exports= helpers
+module.exports = auth;
