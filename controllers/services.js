@@ -1,16 +1,19 @@
 const Service = require('../models/services');
+const Collaborator = require("../models/collaborator");
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
-  const { description, price, city, services, createdBy } = req.body;
-  if (!description || !price || !city || !services || !createdBy) {
+  const collab = await Collaborator.findById(req.collab)
+  console.log(req.collab);
+  const { description, price, city, services } = req.body;
+  if (!description || !price || !city || !services) {
     throw new BadRequestError(
-      'Please provide Service, descripction, city, price, createdBy'
+      'Please provide Service, descripction, city, price'
     );
   }
 
-  const service = await Service.create({ ...req.body });
+  const service = await Service.create({ ...req.body, createdBy: collab });
   res.status(StatusCodes.CREATED).json({ service });
 };
 
@@ -24,8 +27,8 @@ const GetServices = async (req, res) => {
 };
 
 const GetServicesByUser = async (req, res) => {
-  // const { id: serviceId } = req.params; 
-  // console.log(req.params);
+   const {id: serviceId } = req.params; 
+  console.log(req.params);
   const service = await Service.find({createdBy: userId});
   res.status(StatusCodes.OK).json({ service }); 
 }

@@ -20,7 +20,7 @@ const serviceSchema = new moongose.Schema({
       msg: 'Value is not suported',
     },
   },
-  createdBy: { type: String, required: true },
+  createdBy: { type: String }
 });
 
 module.exports = moongose.model('Services', serviceSchema);

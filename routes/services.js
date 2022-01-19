@@ -1,3 +1,4 @@
+const auth = require('../middleware/authorization')
 const express = require('express');
 
 const {
@@ -9,9 +10,9 @@ const {
 } = require('../controllers/services');
 const router = express.Router();
 
-router.route('/services').post(CreateServices).get(GetServices);
+router.route('/services').post(auth, CreateServices).get(GetServices);
 router.route('/service/:id').put(UpdateService).delete(DeleteService);
 // !Change this                             👇 controller
-router.route('/collaborator/:id/services').get(GetServices);
+router.route("/collaborator/:id/services").get(GetServicesByUser);
 
 module.exports = router;

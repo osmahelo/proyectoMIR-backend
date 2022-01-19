@@ -1,4 +1,5 @@
 const User = require('../models/users');
+const jwt = require("jsonwebtoken");
 const Collaborator = require('../models/collaborator');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
@@ -21,7 +22,6 @@ const collaboratorRegister = async (req, res) => {
   const collaborator = await Collaborator.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ collaborator });
 };
-
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -46,7 +46,10 @@ const userLogin = async (req, res) => {
     if (!isPasswordCorrectColab) {
       throw new UnauthenticatedError('invalid password');
     }
-    res.status(StatusCodes.OK).json({ collaborator });
+    const token = jwt.sign({
+      id:collaborator._id}, 'MyScret', {expiresIn:'1d'}
+    )
+    res.status(StatusCodes.OK).json({ collaborator, token });
   }
 };
 
