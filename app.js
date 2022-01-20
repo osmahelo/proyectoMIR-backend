@@ -1,13 +1,15 @@
 require('dotenv').config();
 require('express-async-errors');
+
 const express = require('express');
 const connectDb = require('./db/db');
 
-//Middleware
 const app = express();
-app.use(express.json());
 const PORT = process.env.PORT;
 const URI = process.env.MONGO_URI;
+
+app.use(express.json());
+
 //Routes
 const userRoutes = require('./routes/users');
 const servicesRoutes = require('./routes/services');
