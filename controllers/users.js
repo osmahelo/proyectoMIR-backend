@@ -1,6 +1,7 @@
 const User = require('../models/users');
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const Collaborator = require('../models/collaborator');
+const { emailCompare } = require('../utils/emailCompare');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
 
@@ -10,6 +11,9 @@ const userRegister = async (req, res) => {
   if (!name || !email || !password || !lastName) {
     throw new BadRequestError('Please provide name, lastname, email,password');
   }
+  if (emailCompare(email)) {
+    throw new BadRequestError('Email already exists');
+  }
   const user = await User.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ user });
 };
@@ -18,6 +22,9 @@ const collaboratorRegister = async (req, res) => {
   const { name, email, password, lastName } = req.body;
   if (!name || !email || !password || !lastName) {
     throw new BadRequestError('Please provide name, lastname, email, password');
+  }
+  if (emailCompare(email)) {
+    throw new BadRequestError('Email already exists');
   }
   const collaborator = await Collaborator.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ collaborator });
@@ -46,9 +53,13 @@ const userLogin = async (req, res) => {
     if (!isPasswordCorrectColab) {
       throw new UnauthenticatedError('invalid password');
     }
-    const token = jwt.sign({
-      id:collaborator._id}, 'MyScret', {expiresIn:'1d'}
-    )
+    const token = jwt.sign(
+      {
+        id: collaborator._id,
+      },
+      'MyScret',
+      { expiresIn: '1d' }
+    );
     res.status(StatusCodes.OK).json({ collaborator, token });
   }
 };

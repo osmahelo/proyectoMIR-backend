@@ -28,7 +28,7 @@ const collaboratorSchema = new mongoose.Schema({
     maxlength: 10,
   },
   image: { type: String, required: false },
-  yearsExperiencie: { type: String, required: true },
+  yearsExperiencie: { type: String, required: false },
   certificates: { type: String, required: false },
   idFile: { type: String, required: false },
   createdAt: { type: Date, default: Date.now() },
