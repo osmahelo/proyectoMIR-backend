@@ -5,7 +5,6 @@ const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
   const collab = await Collaborator.findById(req.collab);
-  console.log(req.collab);
   const { description, price, city, services } = req.body;
   if (!description || !price || !city || !services) {
     throw new BadRequestError(
@@ -26,10 +25,9 @@ const GetServices = async (req, res) => {
   res.status(StatusCodes.OK).json({ service });
 };
 
-const GetServicesByUser = async (req, res) => {
-  const { id: serviceId } = req.params;
-  console.log(req.params);
-  const service = await Service.find({ createdBy: userId });
+const GetServicesByCollab = async (req, res) => {
+  const { id: collabId } = req.params;
+  const service = await Service.find({ createdBy: collabId });
   res.status(StatusCodes.OK).json({ service });
 };
 
@@ -59,5 +57,5 @@ module.exports = {
   GetServices,
   UpdateService,
   DeleteService,
-  GetServicesByUser,
+  GetServicesByCollab,
 };
