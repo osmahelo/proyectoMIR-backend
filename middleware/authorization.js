@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 //const { StatusCodes } = require("http-status-codes");
 //const { BadRequestError } = require("../errors");
 
@@ -6,11 +6,11 @@ const auth = (req, res, next) => {
   try {
     const { authorization } = req.headers;
     if (!authorization) {
-      throw Error("no authorization!");
+      throw Error('no authorization!');
     }
-    const [bearer, token] = authorization.split(" ");
+    const [, token] = authorization.split(' ');
     if (!token) {
-      throw Error("no token!");
+      throw Error('no token!');
     }
     const { id } = jwt.verify(token, 'MyScret');
     req.collab = id;
