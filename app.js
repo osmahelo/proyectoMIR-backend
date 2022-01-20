@@ -6,7 +6,8 @@ const connectDb = require('./db/db');
 //Middleware
 const app = express();
 app.use(express.json());
-const port = process.env.port || 3001;
+const PORT = process.env.PORT;
+const URI = process.env.MONGO_URI;
 //Routes
 const userRoutes = require('./routes/users');
 const servicesRoutes = require('./routes/services');
@@ -20,11 +21,9 @@ app.use(errorHandlerMiddleware);
 //Initialize
 const start = async () => {
   try {
-    await connectDb(
-      'mongodb+srv://LauraCanon:Makeitreal@cluster0.vrmch.mongodb.net/users?retryWrites=true&w=majority'
-    );
+    await connectDb(URI);
     console.log('Conected to DB');
-    app.listen(port, () => console.log(`Listening on port ${port}`));
+    app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
   } catch (error) {
     console.log(error);
   }

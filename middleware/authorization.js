@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
-//const { StatusCodes } = require("http-status-codes");
-//const { BadRequestError } = require("../errors");
-
+const SECRET = process.env.JWT_SECRETS;
 const auth = (req, res, next) => {
   try {
     const { authorization } = req.headers;
@@ -12,7 +10,7 @@ const auth = (req, res, next) => {
     if (!token) {
       throw Error('no token!');
     }
-    const { id } = jwt.verify(token, 'MyScret');
+    const { id } = jwt.verify(token, SECRET);
     req.collab = id;
     console.log(id);
     next();

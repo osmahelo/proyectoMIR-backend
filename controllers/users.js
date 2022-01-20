@@ -4,7 +4,7 @@ const Collaborator = require('../models/collaborator');
 const { emailCompare } = require('../utils/emailCompare');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
-
+const SECRET = process.env.JWT_SECRETS;
 //Creación de usuario
 const userRegister = async (req, res) => {
   const { name, email, password, lastName } = req.body;
@@ -57,7 +57,7 @@ const userLogin = async (req, res) => {
       {
         id: collaborator._id,
       },
-      'MyScret',
+      SECRET,
       { expiresIn: '1d' }
     );
     res.status(StatusCodes.OK).json({ collaborator, token });
