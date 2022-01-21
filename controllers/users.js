@@ -12,7 +12,7 @@ const userRegister = async (req, res) => {
     throw new BadRequestError('Please provide name, lastname, email,password');
   }
   if (emailCompare(email)) {
-    throw new BadRequestError('Email already exists');
+    throw new BadRequestError('Email already exists in Collabs');
   }
   const user = await User.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ user });
@@ -23,8 +23,8 @@ const collaboratorRegister = async (req, res) => {
   if (!name || !email || !password || !lastName) {
     throw new BadRequestError('Please provide name, lastname, email, password');
   }
-  if (emailCompare(email)) {
-    throw new BadRequestError('Email already exists');
+  if (await emailCompare(email)) {
+    throw new BadRequestError('Email already exists in Users');
   }
   const collaborator = await Collaborator.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ collaborator });

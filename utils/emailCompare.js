@@ -3,7 +3,7 @@ const Collaborator = require('../models/collaborator');
 
 const emailCompare = async (email) => {
   const emailCollab = await Collaborator.findOne({ email: email });
-  const emailUser = User.findOne({ email });
+  const emailUser = await User.findOne({ email: email });
   if (emailCollab) {
     return true;
   }
