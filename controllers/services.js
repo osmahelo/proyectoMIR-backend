@@ -66,13 +66,6 @@ const SearchServices = async (req, res) => {
       name: 1,
       _id: 0,
     });
-  // const service = await Service.find({ services: serviceName }).select({
-  //   price: 1,
-  //   city: 1,
-  //   createdBy: 1,
-  //   _id: 0,
-  // });
-
   res.status(200).json({ servByCollab });
 };
 module.exports = {
