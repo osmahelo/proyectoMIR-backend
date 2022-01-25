@@ -21,10 +21,6 @@ async function main() {
     text: "Hello world?",
     html: "<b>Yesssss, we made it!!!</b>",
   });
-
-  console.log("Message sent: %s", info.messageId);
-
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 
 main().catch(console.error);
