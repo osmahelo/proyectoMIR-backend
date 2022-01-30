@@ -1,9 +1,30 @@
 "use strict";
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 const templateCreateAccount = require("./template_email");
 
-async function main(user) {
+async function sendEmailSendGrid(data) {
+  sgMail.setApiKey(
+    "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"
+  );
+  const msg = {
+    to: data.to, // Change to your recipient
+    from: "Fix Hogar <fixhogar.mir@gmail.com>", // Change to your verified sender
+    subject: data.subject,
+    template_id: data.template_id,
+    dynamic_template_data: data.dynamic_template_data,
+  };
+  try {
+    const response = await sgMail.send(msg);
+    console.log("envio correo");
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function sendEmail(user) {
+  //sgMail.setApiKey('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')
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -24,4 +45,4 @@ async function main(user) {
 }
 
 // main({ email: "laurafcanon@gmail.com", name: "Laura" });
-module.exports = main;
+module.exports = { sendEmail, sendEmailSendGrid };

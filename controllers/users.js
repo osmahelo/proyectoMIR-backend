@@ -5,7 +5,7 @@ const { emailCompare } = require("../utils/emailCompare");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, UnauthenticatedError } = require("../errors");
 const SECRET = process.env.JWT_SECRETS;
-const main = require("../utils/send_email");
+const { sendEmail, sendEmailSendGrid } = require("../utils/send_email");
 
 //Creación de usuario
 const userRegister = async (req, res) => {
@@ -17,7 +17,16 @@ const userRegister = async (req, res) => {
     throw new BadRequestError("Email already exists in Collabs");
   }
   const user = await User.create({ ...req.body });
-  main(req.body);
+  const emailSend = {
+    to: user.email,
+    subject: "Bienvenido a Fix Hogar - Activa tu cuenta",
+    template_id: "d-bae67e0c936b425ea1767135aa5909f5",
+    dynamic_template_data: {
+      name: user.name,
+    },
+  };
+  sendEmailSendGrid(emailSend);
+  //sendEmail(req.body);
   res.status(StatusCodes.CREATED).json({ user });
 };
 
@@ -30,6 +39,16 @@ const collaboratorRegister = async (req, res) => {
     throw new BadRequestError("Email already exists in Users");
   }
   const collaborator = await Collaborator.create({ ...req.body });
+  const emailSend = {
+    to: collaborator.email,
+    subject: "Bienvenido a Fix Hogar - Activa tu cuenta",
+    template_id: "d-bae67e0c936b425ea1767135aa5909f5",
+    dynamic_template_data: {
+      name: collaborator.name,
+    },
+  };
+  sendEmailSendGrid(emailSend);
+  // sendEmail(req.body);
   res.status(StatusCodes.CREATED).json({ collaborator });
 };
 const userLogin = async (req, res) => {
