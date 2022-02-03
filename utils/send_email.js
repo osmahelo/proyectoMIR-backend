@@ -5,9 +5,7 @@ const sgMail = require("@sendgrid/mail");
 const templateCreateAccount = require("./template_email");
 
 async function sendEmailSendGrid(data) {
-  sgMail.setApiKey(
-    "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"
-  );
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: data.to, // Change to your recipient
     from: "Fix Hogar <fixhogar.mir@gmail.com>", // Change to your verified sender
