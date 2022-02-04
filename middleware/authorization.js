@@ -14,8 +14,11 @@ const getUserbyEmail = async (email) => {
     if(collaborator){
       return collaborator
     }
-  } catch (error) {
-    console.log(error);
+    const { id } = jwt.verify(token, SECRET);
+    req.collab = id;
+    next();
+  } catch (err) {
+    res.status(401).json({ message: err.message });
   }
 };
 const isAuthenticated = (req, res, next) => {

@@ -4,7 +4,6 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
-  const collab = await Collaborator.findById(req.collab);
   const { description, price, city, services } = req.body;
   if (!description || !price || !city || !services) {
     throw new BadRequestError(
