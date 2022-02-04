@@ -1,5 +1,5 @@
-const express = require("express");
-const multer = require("multer");
+const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const {
   userRegister,
@@ -8,6 +8,7 @@ const {
   getAllCollabs,
   verifyAccount,
 } = require("../controllers/users");
+
 const {
   uploadSingleHandler,
   uploadMultipleHandler,
@@ -32,9 +33,7 @@ router.route("/sessionlogin").post(userLogin);
 router.route("/file/user").post(upload.single("image"), uploadSingleHandler);
 router.route("file/collab").post(upload.single("image"), uploadSingleHandler);
 
-//Ruta carga imágenes múltiples
-router
-  .route("/files/collab")
-  .post(upload.array("image"), uploadMultipleHandler);
+//Ruta carga imágenes múltiples 
+router.route("/files/collab").post(upload.array('image'), uploadMultipleHandler);
 
 module.exports = router;
