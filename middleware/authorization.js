@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const User = require("../models/users");
-const Collaborator = require('../models/collaborator')
+const Collaborator = require("../models/collaborator");
 const compose = require("composable-middleware");
 
 const getUserbyEmail = async (email) => {
@@ -8,17 +8,14 @@ const getUserbyEmail = async (email) => {
     const user = await User.findOne({ email });
     const collaborator = await Collaborator.findOne({ email });
 
-    if(user){
+    if (user) {
       return user;
     }
-    if(collaborator){
-      return collaborator
+    if (collaborator) {
+      return collaborator;
     }
-    const { id } = jwt.verify(token, SECRET);
-    req.collab = id;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: err.message });
+  } catch (error) {
+    console.log(error);
   }
 };
 const isAuthenticated = (req, res, next) => {
@@ -35,9 +32,9 @@ const isAuthenticated = (req, res, next) => {
     if (!user) {
       return res.status(500).json({ msg: "Not authorized" });
     }
-       if (!collab) {
-         return res.status(500).json({ msg: "Not authorized" });
-       }
+    if (!collab) {
+      return res.status(500).json({ msg: "Not authorized" });
+    }
     req.user = user;
     req.collab = collab;
     next();
@@ -55,6 +52,5 @@ const hasRole = (roles) => {
       next();
     });
 };
-
 
 module.exports = { isAuthenticated, hasRole, getUserbyEmail };
