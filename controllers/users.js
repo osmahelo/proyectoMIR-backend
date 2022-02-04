@@ -29,6 +29,7 @@ const collaboratorRegister = async (req, res) => {
   const collaborator = await Collaborator.create({ ...req.body });
   res.status(StatusCodes.CREATED).json({ collaborator });
 };
+
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -63,5 +64,16 @@ const userLogin = async (req, res) => {
     res.status(StatusCodes.OK).json({ collaborator, token });
   }
 };
-
-module.exports = { userRegister, collaboratorRegister, userLogin };
+const getAllCollabs = async (req, res) => {
+  const collab = await Collaborator.find(
+    {},
+    { name: 1, lastName: 1, city: 1, _id: 1 }
+  );
+  res.status(200).json({ collab });
+};
+module.exports = {
+  userRegister,
+  collaboratorRegister,
+  userLogin,
+  getAllCollabs,
+};

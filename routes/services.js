@@ -6,6 +6,7 @@ const {
   UpdateService,
   DeleteService,
   GetServices,
+  GetCitys,
   GetServicesByCollab,
   SearchServices,
   paymentService,
@@ -13,6 +14,7 @@ const {
 const router = express.Router();
 
 router.route('/services').post(auth, CreateServices).get(GetServices);
+router.route('/city').get(GetCitys);
 router.route('/service/:id').put(UpdateService).delete(DeleteService);
 router.route('/collaborator/:id/services').get(GetServicesByCollab);
 router.route('/search/services').get(SearchServices);
