@@ -22,7 +22,6 @@ async function sendEmailSendGrid(data) {
 }
 
 async function sendEmail(user) {
-  //sgMail.setApiKey('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')
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
