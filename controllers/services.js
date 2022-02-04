@@ -1,6 +1,5 @@
 const Service = require('../models/services');
 const Collaborator = require('../models/collaborator');
-const epayco = require('../utils/epayco');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 
@@ -81,32 +80,7 @@ const SearchServices = async (req, res) => {
   res.status(200).json({ servByCollab });
 };
 
-const paymentService = async (req, res) => {
-  const credit_info = ({
-    'card[number]': {},
-    'card[exp_year]': {},
-    'card[exp_month]': {},
-    'card[cvc]': {},
-  } = req.body);
-  const customer_info = ({
-    name: {},
-    last_name: {},
-    email: {},
-    default: {},
-    city: {},
-    address: {},
-    phone: {},
-    cell_phone: {},
-  } = req.body);
-  try {
-    const token = await epayco.token.create(credit_info);
-    customer_info.token_card = token.id;
-    const customer = await epayco.customers.create(customer_info);
-    res.status(201).json({ customer });
-  } catch (error) {
-    console.log(error);
-  }
-};
+
 module.exports = {
   CreateServices,
   GetServices,
@@ -115,5 +89,4 @@ module.exports = {
   DeleteService,
   GetServicesByCollab,
   SearchServices,
-  paymentService,
 };

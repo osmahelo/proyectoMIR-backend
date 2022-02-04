@@ -1,29 +1,29 @@
-const bcryptjs = require('bcryptjs');
 const mongoose = require('mongoose');
 const bycrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken");
 
 const collaboratorSchema = new mongoose.Schema({
-  name: { type: String, required: [true, 'Name is required'], minlength: 4 },
+  name: { type: String, required: [true, "Name is required"], minlength: 4 },
   lastName: {
     type: String,
-    required: [true, 'Last Name is required'],
+    required: [true, "Last Name is required"],
     minlength: 4,
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, "Email is required"],
     match: [
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-      'Please provide a valid email',
+      "Please provide a valid email",
     ],
     unique: true,
   },
-  password: { type: String, required: [true, 'Password is required'] },
-  city: { type: String, required: [true, 'City is required'] },
-  address: { type: String, required: [true, 'Address Name is required'] },
+  password: { type: String, required: [true, "Password is required"] },
+  city: { type: String, required: [false, "City is required"] },
+  address: { type: String, required: [false, "Address Name is required"] },
   phone: {
     type: Number,
-    required: [true, 'Phone is required'],
+    required: [false, "Phone is required"],
     minlength: 10,
     maxlength: 10,
   },
@@ -32,16 +32,28 @@ const collaboratorSchema = new mongoose.Schema({
   certificates: { type: String, required: false },
   idFile: { type: String, required: false },
   createdAt: { type: Date, default: Date.now() },
+},
+  { timestamps: true }
+);
+  active: { type: Boolean, default: false },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
-collaboratorSchema.pre('save', async function () {
+
+collaboratorSchema.pre("save", async function () {
   const salt = await bycrypt.genSalt(10);
   this.password = await bycrypt.hash(this.password, salt);
 });
+collaboratorSchema.methods.createJWT = function (payload) {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_LIFETIME,
+  });
+};
 
 collaboratorSchema.methods.comparePassword = async function (passwordcheck) {
   const isMatch = await bycrypt.compare(passwordcheck, this.password);
   return isMatch;
 };
 
-module.exports = mongoose.model('Collaborator', collaboratorSchema);
+module.exports = mongoose.model("Collaborator", collaboratorSchema);

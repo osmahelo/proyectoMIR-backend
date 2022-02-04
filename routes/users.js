@@ -6,13 +6,14 @@ const {
   collaboratorRegister,
   userLogin,
   getAllCollabs,
+  verifyAccount,
 } = require('../controllers/users');
 const {
   uploadSingleHandler,
   uploadMultipleHandler,
 } = require('../utils/upload/upload.controller');
 
-const upload = multer({ dest: './temp' });
+const upload = multer({ dest: "./temp" });
 
 //Ruta registro Usuario
 router.route('/useregister').post(userRegister);
@@ -22,6 +23,9 @@ router.route('/collabregister').post(collaboratorRegister);
 
 //Ruta de todos los colaboradores
 router.route('/allcollabs').get(getAllCollabs);
+
+//Ruta verificación email
+router.route("/activate/:hash/:id").post(verifyAccount);
 
 //Ruta login user/collaborator
 router.route('/sessionlogin').post(userLogin);
