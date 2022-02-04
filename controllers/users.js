@@ -1,4 +1,4 @@
-const get = require('lodash/get')
+const get = require("lodash/get");
 const User = require("../models/users");
 const jwt = require("jsonwebtoken");
 const Collaborator = require("../models/collaborator");
@@ -42,19 +42,21 @@ const userRegister = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ user });
 };
 
-const updateUser = async (id, user)=>{
-    const updatedUser = await User.findByIdAndUpdate(id, user, { new: true });
-    return updatedUser;
-}
+const updateUser = async (id, user) => {
+  const updatedUser = await User.findByIdAndUpdate(id, user, { new: true });
+  return updatedUser;
+};
 const addBillingCustomerId = async (user, customerId) => {
-  const creditCards = get(user, 'billing.creditCards', [])
+  const creditCards = get(user, "billing.creditCards", []);
   const customer = {
     billing: {
       creditCards,
-      customerId
-    }
-  }
-  const updatedUser = await User.findByIdAndUpdate(user._id, customer, { new: true });
+      customerId,
+    },
+  };
+  const updatedUser = await User.findByIdAndUpdate(user._id, customer, {
+    new: true,
+  });
   return updatedUser;
 };
 
@@ -114,7 +116,7 @@ const userLogin = async (req, res) => {
       throw new UnauthenticatedError("invalid password");
     }
 
-     const token = collaborator.createJWT(req.body);
+    const token = collaborator.createJWT(req.body);
     res.status(StatusCodes.OK).json({ collaborator, token });
   }
 };
@@ -170,6 +172,7 @@ async function verifyAccount(req, res) {
   } catch (err) {
     return res.status(400).json(err);
   }
+}
 
 module.exports = {
   userRegister,
