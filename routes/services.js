@@ -10,11 +10,13 @@ const {
   UpdateService,
   DeleteService,
   GetServices,
+  GetCitys,
   GetServicesByCollab,
   SearchServices,
 } = require('../controllers/services');
 const router = express.Router();
 
+router.route('/city').get(GetCitys);
 router
   .route("/services")
   .post(isAuthenticated, CreateServices)

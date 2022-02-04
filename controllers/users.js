@@ -178,6 +178,7 @@ module.exports = {
   userRegister,
   collaboratorRegister,
   userLogin,
+  getAllCollabs,
   updateUser,
   addBillingCustomerId,
   getAllCollabs,

@@ -17,12 +17,25 @@ const CreateServices = async (req, res) => {
 };
 
 const GetServices = async (req, res) => {
-  const { services } = req.body;
-  const service = await Service.find({ services: services });
+  const service = await Service.find({}, { services: 1, _id: 0 }).distinct(
+    'services'
+  );
   if (!service) {
     throw new NotFoundError('Service not found');
   }
   res.status(StatusCodes.OK).json({ service });
+};
+
+const GetCitys = async (req, res) => {
+  const { service } = req.query;
+  const cityService = await Service.find(
+    { services: service },
+    { city: 1, _id: 0 }
+  ).distinct('city');
+  if (!cityService) {
+    throw new NotFoundError('City not found');
+  }
+  res.status(StatusCodes.OK).json({ cityService });
 };
 
 const GetServicesByCollab = async (req, res) => {
@@ -54,16 +67,14 @@ const DeleteService = async (req, res) => {
 };
 
 const SearchServices = async (req, res) => {
-  const { serviceName } = req.query;
-  const servByCollab = await Service.find({ services: serviceName })
+  const { service, city } = req.query;
+  const servByCollab = await Service.find({ services: service, city })
     .populate({
       path: 'createdBy',
-      select: 'name -_id',
+      select: 'name lastName image  -_id',
     })
     .select({
       price: 1,
-      city: 1,
-      name: 1,
       _id: 0,
     });
   res.status(200).json({ servByCollab });
@@ -73,6 +84,7 @@ const SearchServices = async (req, res) => {
 module.exports = {
   CreateServices,
   GetServices,
+  GetCitys,
   UpdateService,
   DeleteService,
   GetServicesByCollab,
