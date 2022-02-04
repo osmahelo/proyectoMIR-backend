@@ -1,22 +1,57 @@
 const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRETS;
-const auth = (req, res, next) => {
+const User = require("../models/users");
+const Collaborator = require('../models/collaborator')
+const compose = require("composable-middleware");
+
+const getUserbyEmail = async (email) => {
   try {
-    const { authorization } = req.headers;
-    if (!authorization) {
-      throw Error('no authorization!');
+    const user = await User.findOne({ email });
+    const collaborator = await Collaborator.findOne({ email });
+
+    if(user){
+      return user;
     }
-    const [, token] = authorization.split(' ');
-    if (!token) {
-      throw Error('no token!');
+    if(collaborator){
+      return collaborator
     }
-    const { id } = jwt.verify(token, SECRET);
-    req.collab = id;
-    console.log(id);
-    next();
-  } catch (err) {
-    res.status(401).json({ message: err.message });
+  } catch (error) {
+    console.log(error);
   }
 };
+const isAuthenticated = (req, res, next) => {
+  return compose().use(async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(500).json({ msg: "No Token provided" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await getUserbyEmail(decoded.email);
+    const collab = await getUserbyEmail(decoded.email);
 
-module.exports = auth;
+    if (!user) {
+      return res.status(500).json({ msg: "Not authorized" });
+    }
+       if (!collab) {
+         return res.status(500).json({ msg: "Not authorized" });
+       }
+    req.user = user;
+    req.collab = collab;
+    next();
+  });
+};
+
+const hasRole = (roles) => {
+  return compose()
+    .use(isAuthenticated())
+    .use((req, res, next) => {
+      const { user } = req;
+      if (roles.includes(user.role)) {
+        return res.status(403).json("forbidden");
+      }
+      next();
+    });
+};
+
+
+module.exports = { isAuthenticated, hasRole, getUserbyEmail };

@@ -1,6 +1,6 @@
-const bcryptjs = require("bcryptjs");
-const mongoose = require("mongoose");
-const bycrypt = require("bcryptjs");
+const mongoose = require('mongoose');
+const bycrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken");
 
 const collaboratorSchema = new mongoose.Schema({
   name: { type: String, required: [true, "Name is required"], minlength: 4 },
@@ -32,15 +32,24 @@ const collaboratorSchema = new mongoose.Schema({
   certificates: { type: String, required: false },
   idFile: { type: String, required: false },
   createdAt: { type: Date, default: Date.now() },
+},
+  { timestamps: true }
+);
   active: { type: Boolean, default: false },
   passwordResetToken: String,
   passwordResetExpires: Date,
 });
 
+
 collaboratorSchema.pre("save", async function () {
   const salt = await bycrypt.genSalt(10);
   this.password = await bycrypt.hash(this.password, salt);
 });
+collaboratorSchema.methods.createJWT = function (payload) {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_LIFETIME,
+  });
+};
 
 collaboratorSchema.methods.comparePassword = async function (passwordcheck) {
   const isMatch = await bycrypt.compare(passwordcheck, this.password);

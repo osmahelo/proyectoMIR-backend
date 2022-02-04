@@ -1,3 +1,4 @@
+const get = require('lodash/get')
 const User = require("../models/users");
 const jwt = require("jsonwebtoken");
 const Collaborator = require("../models/collaborator");
@@ -9,11 +10,17 @@ const { sendEmailSendGrid } = require("../utils/send_email");
 const crypto = require("crypto");
 
 //Creación de usuario
+
 const userRegister = async (req, res) => {
   const { name, email, password, lastName } = req.body;
   if (!name || !email || !password || !lastName) {
     throw new BadRequestError("Please provide name, lastname, email,password");
   }
+
+  // if (emailCompare(email)) {
+  //   throw new BadRequestError('Email already exists in Collabs');
+  // }
+  const user = await User.create({ ...req.body });
   if (await emailCompare(email)) {
     throw new BadRequestError("Email already exists in Collabs");
   }
@@ -33,6 +40,22 @@ const userRegister = async (req, res) => {
   };
   sendEmailSendGrid(emailSend);
   res.status(StatusCodes.CREATED).json({ user });
+};
+
+const updateUser = async (id, user)=>{
+    const updatedUser = await User.findByIdAndUpdate(id, user, { new: true });
+    return updatedUser;
+}
+const addBillingCustomerId = async (user, customerId) => {
+  const creditCards = get(user, 'billing.creditCards', [])
+  const customer = {
+    billing: {
+      creditCards,
+      customerId
+    }
+  }
+  const updatedUser = await User.findByIdAndUpdate(user._id, customer, { new: true });
+  return updatedUser;
 };
 
 const collaboratorRegister = async (req, res) => {
@@ -63,6 +86,7 @@ const collaboratorRegister = async (req, res) => {
   sendEmailSendGrid(emailSend);
   res.status(StatusCodes.CREATED).json({ collaborator });
 };
+
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -80,13 +104,8 @@ const userLogin = async (req, res) => {
     if (!isPasswordCorrect) {
       throw new UnauthenticatedError("Invalid password");
     }
-    const token = jwt.sign(
-      {
-        id: user._id,
-      },
-      SECRET,
-      { expiresIn: "1d" }
-    );
+
+    const token = user.createJWT(req.body);
     res.status(StatusCodes.OK).json({ user, token });
   }
   if (collaborator) {
@@ -94,13 +113,8 @@ const userLogin = async (req, res) => {
     if (!isPasswordCorrectColab) {
       throw new UnauthenticatedError("invalid password");
     }
-    const token = jwt.sign(
-      {
-        id: collaborator._id,
-      },
-      SECRET,
-      { expiresIn: "1d" }
-    );
+
+     const token = collaborator.createJWT(req.body);
     res.status(StatusCodes.OK).json({ collaborator, token });
   }
 };
@@ -156,12 +170,13 @@ async function verifyAccount(req, res) {
   } catch (err) {
     return res.status(400).json(err);
   }
-}
 
 module.exports = {
   userRegister,
   collaboratorRegister,
   userLogin,
+  updateUser,
+  addBillingCustomerId,
   getAllCollabs,
   verifyAccount,
 };
