@@ -41,6 +41,7 @@ const UpdateService = async (req, res) => {
   }
   res.status(StatusCodes.OK).json({ msg: 'Service Updated', service });
 };
+
 const DeleteService = async (req, res) => {
   const { id: serviceId } = req.params;
   const service = await Service.findByIdAndDelete({ _id: serviceId });
@@ -52,10 +53,26 @@ const DeleteService = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'Service Deleted' });
 };
 
+const SearchServices = async (req, res) => {
+  const { serviceName } = req.query;
+  const servByCollab = await Service.find({ services: serviceName })
+    .populate({
+      path: 'createdBy',
+      select: 'name -_id',
+    })
+    .select({
+      price: 1,
+      city: 1,
+      name: 1,
+      _id: 0,
+    });
+  res.status(200).json({ servByCollab });
+};
 module.exports = {
   CreateServices,
   GetServices,
   UpdateService,
   DeleteService,
   GetServicesByCollab,
+  SearchServices,
 };
