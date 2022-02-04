@@ -33,6 +33,7 @@ const collaboratorSchema = new mongoose.Schema({
   idFile: { type: String, required: false },
   createdAt: { type: Date, default: Date.now() },
   active: { type: Boolean, default: false },
+  collaborator: { type: Boolean, default: true },
   passwordResetToken: String,
   passwordResetExpires: Date,
 });

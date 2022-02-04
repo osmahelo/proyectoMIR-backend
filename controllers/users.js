@@ -5,7 +5,7 @@ const { emailCompare } = require("../utils/emailCompare");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, UnauthenticatedError } = require("../errors");
 const SECRET = process.env.JWT_SECRETS;
-const { sendEmail, sendEmailSendGrid } = require("../utils/send_email");
+const { sendEmailSendGrid } = require("../utils/send_email");
 const crypto = require("crypto");
 
 //Creación de usuario
@@ -57,17 +57,14 @@ const collaboratorRegister = async (req, res) => {
     template_id: "d-bae67e0c936b425ea1767135aa5909f5",
     dynamic_template_data: {
       name: collaborator.name,
-      url: `http://localhost:3000/activate/${collaborator.passwordResetToken}`,
+      url: `http://localhost:3000/activate/${collaborator.passwordResetToken}/${collaborator._id}`,
     },
   };
   sendEmailSendGrid(emailSend);
-  // sendEmail(req.body);
   res.status(StatusCodes.CREATED).json({ collaborator });
 };
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email);
-  console.log(password);
   if (!email || !password) {
     throw new BadRequestError("Please provide email and password");
   }
@@ -80,7 +77,6 @@ const userLogin = async (req, res) => {
   }
   if (user) {
     const isPasswordCorrect = await user.comparePassword(password);
-    console.log(isPasswordCorrect);
     if (!isPasswordCorrect) {
       throw new UnauthenticatedError("Invalid password");
     }
@@ -121,23 +117,41 @@ async function findOneUser(query) {
   const user = await User.findOne(query);
   return user;
 }
+async function findOneCollaborator(query) {
+  const collaborator = await Collaborator.findOne(query);
+  return collaborator;
+}
 
 async function verifyAccount(req, res) {
-  const { id, hash } = req.params;
+  const { id } = req.params;
   try {
-    const user = await User.findByIdAndUpdate(
-      id,
-      { active: true, passwordResetToken: null, passwordResetExpires: null },
-      { new: true }
-    );
-    if (!user) {
-      return res.status(404).json({ message: "Invalid Token" });
+    const userExist = await User.findById({ _id: id });
+    const collabExist = await Collaborator.findById({ _id: id });
+    if (userExist) {
+      const user = await User.findByIdAndUpdate(
+        id,
+        { active: true, passwordResetToken: null, passwordResetExpires: null },
+        { new: true }
+      );
+      if (!user) {
+        return res.status(404).json({ message: "Invalid Token" });
+      }
+      if (Date.now() > user.passwordResetExpires) {
+        return res.status(404).json({ message: "Token expired" });
+      }
+    } else if (collabExist) {
+      const collaborator = await Collaborator.findByIdAndUpdate(
+        id,
+        { active: true, passwordResetToken: null, passwordResetExpires: null },
+        { new: true }
+      );
+      if (!collaborator) {
+        return res.status(404).json({ message: "Invalid Token" });
+      }
+      if (Date.now() > collaborator.passwordResetExpires) {
+        return res.status(404).json({ message: "Token expired" });
+      }
     }
-
-    if (Date.now() > user.passwordResetExpires) {
-      return res.status(404).json({ message: "Token expired" });
-    }
-
     return res.status(200).json({ message: "Account Verified" });
   } catch (err) {
     return res.status(400).json(err);
