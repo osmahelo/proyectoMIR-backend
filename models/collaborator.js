@@ -28,7 +28,12 @@ const collaboratorSchema = new mongoose.Schema(
       minlength: 10,
       maxlength: 10,
     },
-    image: { type: String, required: false },
+    image: {
+      type: String,
+      required: false,
+      default:
+        "http://res.cloudinary.com/lauracanon/image/upload/v1644268959/yqjrfjunz7xv6qa0ng5z.png",
+    },
     yearsExperiencie: { type: String, required: false },
     certificates: { type: String, required: false },
     idFile: { type: String, required: false },
