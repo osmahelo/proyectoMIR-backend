@@ -1,5 +1,5 @@
-const express = require('express');
-const multer = require('multer');
+const express = require("express");
+const multer = require("multer");
 const router = express.Router();
 const {
   userRegister,
@@ -7,36 +7,39 @@ const {
   userLogin,
   getAllCollabs,
   verifyAccount,
-} = require('../controllers/users');
+} = require("../controllers/users");
+const { isAuthenticated } = require("../middleware/authorization");
 const {
   uploadSingleHandler,
   uploadMultipleHandler,
-} = require('../utils/upload/upload.controller');
+} = require("../utils/upload/upload.controller");
 
 const upload = multer({ dest: "./temp" });
 
 //Ruta registro Usuario
-router.route('/useregister').post(userRegister);
+router.route("/useregister").post(userRegister);
 
 //Ruta registro Colaborador
-router.route('/collabregister').post(collaboratorRegister);
+router.route("/collabregister").post(collaboratorRegister);
 
 //Ruta de todos los colaboradores
-router.route('/allcollabs').get(getAllCollabs);
+router.route("/allcollabs").get(getAllCollabs);
 
 //Ruta verificación email
 router.route("/activate/:hash/:id").post(verifyAccount);
 
 //Ruta login user/collaborator
-router.route('/sessionlogin').post(userLogin);
+router.route("/sessionlogin").post(userLogin);
 
 //Ruta carga imágenes user/collaborator
-router.route('/file/user').post(upload.single('image'), uploadSingleHandler);
-router.route('file/collab').post(upload.single('image'), uploadSingleHandler);
+router
+  .route("/file/user")
+  .post(isAuthenticated(), upload.single("file"), uploadSingleHandler);
+router.route("file/collab").post(upload.single("image"), uploadSingleHandler);
 
 //Ruta carga imágenes múltiples
 router
-  .route('/files/collab')
-  .post(upload.array('image'), uploadMultipleHandler);
+  .route("/files/collab")
+  .post(upload.array("image"), uploadMultipleHandler);
 
 module.exports = router;

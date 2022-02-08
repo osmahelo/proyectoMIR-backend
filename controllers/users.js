@@ -20,7 +20,7 @@ const userRegister = async (req, res) => {
   // if (emailCompare(email)) {
   //   throw new BadRequestError('Email already exists in Collabs');
   // }
-  const user = await User.create({ ...req.body });
+
   if (await emailCompare(email)) {
     throw new BadRequestError("Email already exists in Collabs");
   }
@@ -32,7 +32,7 @@ const userRegister = async (req, res) => {
   const emailSend = {
     to: user.email,
     subject: "Bienvenido a Fix Hogar - Activa tu cuenta",
-    template_id: "d-bae67e0c936b425ea1767135aa5909f5",
+    template_id: process.env.TEMPLATE_ID,
     dynamic_template_data: {
       name: user.name,
       url: `http://localhost:3000/activate/${user.passwordResetToken}/${user._id}`,
@@ -42,9 +42,21 @@ const userRegister = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ user });
 };
 
-const updateUser = async (id, user) => {
-  const updatedUser = await User.findByIdAndUpdate(id, user, { new: true });
+const updateUser = async (user, image) => {
+  const updatedUser = await User.findByIdAndUpdate(user._id, image, {
+    new: true,
+  });
   return updatedUser;
+};
+const updateCollab = async (collab, image) => {
+  const updatedCollab = await Collaborator.findByIdAndUpdate(
+    collab._id,
+    image,
+    {
+      new: true,
+    }
+  );
+  return updatedCollab;
 };
 const addBillingCustomerId = async (user, customerId) => {
   const creditCards = get(user, "billing.creditCards", []);
@@ -79,7 +91,7 @@ const collaboratorRegister = async (req, res) => {
   const emailSend = {
     to: collaborator.email,
     subject: "Bienvenido a Fix Hogar - Activa tu cuenta",
-    template_id: "d-bae67e0c936b425ea1767135aa5909f5",
+    template_id: process.env.TEMPLATE_ID,
     dynamic_template_data: {
       name: collaborator.name,
       url: `http://localhost:3000/activate/${collaborator.passwordResetToken}/${collaborator._id}`,
@@ -180,6 +192,7 @@ module.exports = {
   userLogin,
   getAllCollabs,
   updateUser,
+  updateCollab,
   addBillingCustomerId,
   getAllCollabs,
   verifyAccount,

@@ -1,17 +1,25 @@
-const fs = require('fs');
-const cloudinary = require('cloudinary');
+const fs = require("fs");
+const cloudinary = require("cloudinary");
+const { updateUser, updateCollab } = require("../../controllers/users");
 
 cloudinary.config({
-  cloud_name: 'lauracanon',
-  api_key: '551197349596579',
-  api_secret: 'G346jnn5TvaxiOtDV6eavs3wMg0',
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
 });
 
 async function uploadSingleHandler(req, res) {
   const { file, body } = req;
   try {
     const result = await cloudinary.uploader.upload(file.path);
-    res.status(200).json({ message: 'se conecto a la ruta', result });
+    const user = req.user;
+    const collab = req.collab;
+    if (user) {
+      await updateUser(user._id, { image: result.url });
+      res.status(200).json({ message: "Imágen actualizada", result });
+    }
+    await updateCollab(collab._id, { image: result.url });
+    res.status(200).json({ message: "Imágen actualizada", result });
   } catch (e) {
     res.status(500).json(e);
   } finally {
@@ -33,10 +41,10 @@ async function uploadMultipleHandler(req, res) {
       fs.unlinkSync(sigleFile.path);
     }
   }
-  res.status(200).json({ message: 'También se conectó', response });
+  res.status(200).json({ message: "También se conectó", response });
 }
 
 module.exports = {
   uploadSingleHandler,
-  uploadMultipleHandler
-}
+  uploadMultipleHandler,
+};
