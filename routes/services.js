@@ -19,7 +19,7 @@ const router = express.Router();
 router.route('/city').get(GetCitys);
 router
   .route("/services")
-  .post(isAuthenticated, CreateServices)
+  .post(isAuthenticated(), CreateServices)
   .get(GetServices);
 router.route('/service/:id').put(UpdateService).delete(DeleteService);
 router.route('/collaborator/:id/services').get(GetServicesByCollab);

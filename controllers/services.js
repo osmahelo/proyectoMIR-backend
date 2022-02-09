@@ -4,15 +4,26 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
-  const { description, price, city, services } = req.body;
-  if (!description || !price || !city || !services) {
-    throw new BadRequestError(
-      'Please provide Service, descripction, city, price'
-    );
+ 
+  try {
+    console.log(req.collab);
+    const collaborator = await Collaborator.findById(req.collab._id)
+    const { description, price, city, services } = req.body;
+    if (!description || !price || !city || !services) {
+      throw new BadRequestError(
+        'Please provide Service, descripction, city, price'
+      );
+    }
+  
+    const service = await Service.create({ ...req.body, createdBy: req.collab._id });
+    collaborator.services.push(service)
+    await collaborator.save()
+    res.status(StatusCodes.CREATED).json({ service, collaborator });
+    
+  } catch (error) {
+    console.log(error);
+    
   }
-
-  const service = await Service.create({ ...req.body, createdBy: collab._id });
-  res.status(StatusCodes.CREATED).json({ service });
 };
 
 const GetServices = async (req, res) => {
