@@ -37,20 +37,21 @@ const isAuthenticated = (req, res, next) => {
     }
     req.user = user;
     req.collab = collab;
+ 
     next();
   });
 };
 
-const hasRole = (roles) => {
-  return compose()
-    .use(isAuthenticated())
-    .use((req, res, next) => {
-      const { user } = req;
-      if (roles.includes(user.role)) {
-        return res.status(403).json("forbidden");
-      }
-      next();
-    });
-};
+// const hasRole = (roles) => {
+//   return compose()
+//     .use(isAuthenticated())
+//     .use((req, res, next) => {
+//       const { user } = req;
+//       if (roles.includes(user.role)) {
+//         return res.status(403).json("forbidden");
+//       }
+//       next();
+//     });
+// };
 
-module.exports = { isAuthenticated, hasRole, getUserbyEmail };
+module.exports = { isAuthenticated, getUserbyEmail };

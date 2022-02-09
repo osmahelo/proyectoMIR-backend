@@ -39,9 +39,16 @@ const collaboratorSchema = new mongoose.Schema(
     idFile: { type: String, required: false },
     createdAt: { type: Date, default: Date.now() },
     active: { type: Boolean, default: false },
+    services: [
+      {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Services",
+      },
+    ],
     passwordResetToken: String,
     passwordResetExpires: Date,
   },
+
   { timestamps: true }
 );
 
