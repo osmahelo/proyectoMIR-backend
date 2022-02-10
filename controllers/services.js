@@ -4,25 +4,29 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 
 const CreateServices = async (req, res) => {
- 
   try {
-    console.log(req.collab);
-    const collaborator = await Collaborator.findById(req.collab._id)
-    const { description, price, city, services } = req.body;
-    if (!description || !price || !city || !services) {
+    const { description, price, services } = req.body;
+    if (!description || !price || !services) {
       throw new BadRequestError(
         'Please provide Service, descripction, city, price'
       );
     }
-  
-    const service = await Service.create({ ...req.body, createdBy: req.collab._id });
-    collaborator.services.push(service)
-    await collaborator.save()
+
+    const service = await Service.create({
+      ...req.body,
+      city: req.collab.city,
+      createdBy: req.collab._id,
+    });
+    const collaborator = await Collaborator.findByIdAndUpdate(
+      req.collab.id,
+      {
+        services: service,
+      },
+      { new: true }
+    );
     res.status(StatusCodes.CREATED).json({ service, collaborator });
-    
   } catch (error) {
     console.log(error);
-    
   }
 };
 
@@ -81,7 +85,7 @@ const SearchServices = async (req, res) => {
   const servByCollab = await Service.find({ services: service, city })
     .populate({
       path: 'createdBy',
-      select: 'name lastName image  -_id',
+      select: 'name lastName image _id',
     })
     .select({
       price: 1,
@@ -89,7 +93,6 @@ const SearchServices = async (req, res) => {
     });
   res.status(200).json({ servByCollab });
 };
-
 
 module.exports = {
   CreateServices,
