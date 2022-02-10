@@ -9,6 +9,7 @@ const {updateUser, addBillingCustomerId} = require('../controllers/users')
 const get = require('lodash/get')
 
 const createCardTokenHandler = async (req, res) => {
+ 
   const { cardnumber, cardExp_year, cardExp_month, cardCvc } = req.body;
   const creditinfo = {
 
@@ -34,7 +35,7 @@ const createCardTokenHandler = async (req, res) => {
           mask: card.mask,
           tokenId: id,
         }),
-        //customerId: id
+       
       },
     };
     
