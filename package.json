@@ -4,7 +4,7 @@
   "description": "",
   "engines": {
     "node": "16.x"
-  }
+  },
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
