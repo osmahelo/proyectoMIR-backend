@@ -71,7 +71,7 @@ const SearchServices = async (req, res) => {
   const servByCollab = await Service.find({ services: service, city })
     .populate({
       path: 'createdBy',
-      select: 'name lastName image  -_id',
+      select: 'name lastName image  _id',
     })
     .select({
       price: 1,
