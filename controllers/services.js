@@ -53,7 +53,7 @@ const GetCitys = async (req, res) => {
 };
 
 const GetServicesByCollab = async (req, res) => {
-  const { id: collabId } = req.params;
+  const { _id: collabId } = req.collab;
   const service = await Service.find({ createdBy: collabId });
   res.status(StatusCodes.OK).json({ service });
 };
