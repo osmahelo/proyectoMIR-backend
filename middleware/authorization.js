@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/users');
-const Collaborator = require('../models/collaborator');
-const compose = require('composable-middleware');
+const jwt = require("jsonwebtoken");
+const User = require("../models/users");
+const Collaborator = require("../models/collaborator");
+const compose = require("composable-middleware");
 
 const getUserbyEmail = async (email) => {
   try {
@@ -21,19 +21,19 @@ const getUserbyEmail = async (email) => {
 const isAuthenticated = (req, res, next) => {
   return compose().use(async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(500).json({ msg: 'No Token provided' });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(500).json({ msg: "No Token provided" });
     }
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await getUserbyEmail(decoded.email);
     const collab = await getUserbyEmail(decoded.email);
 
     if (!user) {
-      return res.status(500).json({ msg: 'Not authorized' });
+      return res.status(500).json({ msg: "Not authorized" });
     }
     if (!collab) {
-      return res.status(500).json({ msg: 'Not authorized' });
+      return res.status(500).json({ msg: "Not authorized" });
     }
     req.user = user;
     req.collab = collab;
