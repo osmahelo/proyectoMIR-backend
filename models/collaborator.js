@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 const bycrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const requestService = new mongoose.Schema(
+  {
+    idUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const collaboratorSchema = new mongoose.Schema(
   {
     name: { type: String, required: [true, "Name is required"], minlength: 4 },
@@ -41,6 +52,7 @@ const collaboratorSchema = new mongoose.Schema(
     active: { type: Boolean, default: false },
     passwordResetToken: String,
     passwordResetExpires: Date,
+    request: [requestService],
   },
   { timestamps: true }
 );
