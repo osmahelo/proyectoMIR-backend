@@ -1,8 +1,8 @@
 const {
   isAuthenticated,
   getUserbyEmail,
-} = require("../middleware/authorization");
-const express = require("express");
+} = require('../middleware/authorization');
+const express = require('express');
 
 const {
   CreateServices,
@@ -13,20 +13,22 @@ const {
   GetServicesByCollab,
   SearchServices,
   scheduleServiceHandler,
-} = require("../controllers/services");
+} = require('../controllers/services');
 const router = express.Router();
 
-router.route("/city").get(GetCitys);
+router.route('/city').get(GetCitys);
 router
-  .route("/services")
+  .route('/services')
   .post(isAuthenticated(), CreateServices)
   .get(GetServices);
-router.route("/service/:id").put(UpdateService).delete(DeleteService);
-router.route("/collaborator/:id/services").get(GetServicesByCollab);
-router.route("/search/services").get(SearchServices);
+router.route('/service/:id').put(UpdateService).delete(DeleteService);
+router
+  .route('/collaborator/service')
+  .get(isAuthenticated(), GetServicesByCollab);
+router.route('/search/services').get(SearchServices);
 //Ruta servicio solicitado
 router
-  .route("/schedule/service")
+  .route('/schedule/service')
   .post(isAuthenticated(), scheduleServiceHandler);
 
 module.exports = router;
