@@ -1,6 +1,5 @@
 const {
   isAuthenticated,
-  hasRole,
   getUserbyEmail,
 } = require('../middleware/authorization');
 const express = require('express');
@@ -13,6 +12,7 @@ const {
   GetCitys,
   GetServicesByCollab,
   SearchServices,
+  scheduleServiceHandler,
 } = require('../controllers/services');
 const router = express.Router();
 
@@ -26,5 +26,9 @@ router
   .route('/collaborator/service')
   .get(isAuthenticated(), GetServicesByCollab);
 router.route('/search/services').get(SearchServices);
+//Ruta servicio solicitado
+router
+  .route('/schedule/service')
+  .post(isAuthenticated(), scheduleServiceHandler);
 
 module.exports = router;
