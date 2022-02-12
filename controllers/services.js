@@ -1,19 +1,17 @@
-const Service = require('../models/services');
-const Collaborator = require('../models/collaborator');
-const { updateUser, updateCollab } = require('../controllers/users');
-// const requestService = require("../models/services");
-const { StatusCodes } = require('http-status-codes');
-const { sendEmailSendGrid } = require('../utils/send_email');
-const { BadRequestError, NotFoundError } = require('../errors');
-
-const get = require('lodash/get');
+const Service = require("../models/services");
+const Collaborator = require("../models/collaborator");
+const { updateUser, updateCollab } = require("../controllers/users");
+const { StatusCodes } = require("http-status-codes");
+const { sendEmailSendGrid } = require("../utils/send_email");
+const { BadRequestError, NotFoundError } = require("../errors");
+const get = require("lodash/get");
 
 const CreateServices = async (req, res) => {
   try {
     const { description, price, services } = req.body;
     if (!description || !price || !services) {
       throw new BadRequestError(
-        'Please provide Service, descripction, city, price'
+        "Please provide Service, descripction, city, price"
       );
     }
 
@@ -37,10 +35,10 @@ const CreateServices = async (req, res) => {
 
 const GetServices = async (req, res) => {
   const service = await Service.find({}, { services: 1, _id: 0 }).distinct(
-    'services'
+    "services"
   );
   if (!service) {
-    throw new NotFoundError('Service not found');
+    throw new NotFoundError("Service not found");
   }
   res.status(StatusCodes.OK).json({ service });
 };
@@ -50,9 +48,9 @@ const GetCitys = async (req, res) => {
   const cityService = await Service.find(
     { services: service },
     { city: 1, _id: 0 }
-  ).distinct('city');
+  ).distinct("city");
   if (!cityService) {
-    throw new NotFoundError('City not found');
+    throw new NotFoundError("City not found");
   }
   res.status(StatusCodes.OK).json({ cityService });
 };
@@ -69,9 +67,9 @@ const UpdateService = async (req, res) => {
     new: true,
   });
   if (!service) {
-    throw new NotFoundError('Service ID not found');
+    throw new NotFoundError("Service ID not found");
   }
-  res.status(StatusCodes.OK).json({ msg: 'Service Updated', service });
+  res.status(StatusCodes.OK).json({ msg: "Service Updated", service });
 };
 
 const DeleteService = async (req, res) => {
@@ -79,18 +77,18 @@ const DeleteService = async (req, res) => {
   const service = await Service.findByIdAndDelete({ _id: serviceId });
   if (!service) {
     throw new NotFoundError(
-      'Service ID not found, service could not be deleted'
+      "Service ID not found, service could not be deleted"
     );
   }
-  res.status(StatusCodes.OK).json({ msg: 'Service Deleted' });
+  res.status(StatusCodes.OK).json({ msg: "Service Deleted" });
 };
 
 const SearchServices = async (req, res) => {
   const { service, city } = req.query;
   const servByCollab = await Service.find({ services: service, city })
     .populate({
-      path: 'createdBy',
-      select: 'name lastName image _id',
+      path: "createdBy",
+      select: "name lastName image _id",
     })
     .select({
       price: 1,
@@ -102,8 +100,9 @@ const SearchServices = async (req, res) => {
 const scheduleServiceHandler = async (req, res) => {
   try {
     const { idService } = req.body;
+    console.log(idService);
     const { _id: idUser } = req.user;
-    const requestByUser = get(req.user, 'request', []);
+    const requestByUser = get(req.user, "request", []);
     const infoByUser = {
       request: requestByUser.concat({
         idService: idService,
@@ -113,7 +112,7 @@ const scheduleServiceHandler = async (req, res) => {
     const service = await Service.findById(idService);
     const emailSend = {
       to: userUpdated.email,
-      subject: 'Servicio Agendado',
+      subject: "Servicio Agendado",
       template_id: process.env.TEMPLATE_REQUEST,
       dynamic_template_data: {
         name: userUpdated.name,
@@ -125,7 +124,7 @@ const scheduleServiceHandler = async (req, res) => {
 
     const idCollab = await Service.findById(idService);
     const collab = await Collaborator.findById(idCollab.createdBy);
-    const requestByCollab = get(collab, 'request', []);
+    const requestByCollab = get(collab, "request", []);
     const infoByCollab = {
       request: requestByCollab.concat({
         idUser,
@@ -135,7 +134,7 @@ const scheduleServiceHandler = async (req, res) => {
     const serviceCollab = await Service.findById(idService);
     const emailCollab = {
       to: collabUpdated.email,
-      subject: 'Servicio Agendado',
+      subject: "Servicio Agendado",
       template_id: process.env.TEMPLATE_REQUEST,
       dynamic_template_data: {
         name: collabUpdated.name,
@@ -150,6 +149,21 @@ const scheduleServiceHandler = async (req, res) => {
   }
 };
 
+const GetServicesByUser = async (req, res) => {
+  try {
+    const { request } = req.user;
+    let id = [];
+    const service = [];
+    for (let i = 0; i <= request.length - 1; i++) {
+      id = request[i];
+      service.push(await Service.findById(id.idService));
+    }
+    return res.status(201).json(service);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   CreateServices,
   GetServices,
@@ -157,6 +171,7 @@ module.exports = {
   UpdateService,
   DeleteService,
   GetServicesByCollab,
+  GetServicesByUser,
   SearchServices,
   scheduleServiceHandler,
 };
