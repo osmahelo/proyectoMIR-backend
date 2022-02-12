@@ -41,6 +41,17 @@ const billingSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const requestService = new mongoose.Schema(
+  {
+    idService: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Services",
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: [true, "Name is required"], minlength: 4 },
@@ -72,6 +83,7 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: String,
     passwordResetExpires: Date,
     billing: billingSchema,
+    request: [requestService],
   },
 
   { timestamps: true }
