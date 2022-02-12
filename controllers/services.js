@@ -1,8 +1,12 @@
 const Service = require("../models/services");
 const Collaborator = require("../models/collaborator");
-const requestService = require("../models/services");
+const { updateUser, updateCollab } = require("../controllers/users");
+// const requestService = require("../models/services");
 const { StatusCodes } = require("http-status-codes");
+const { sendEmailSendGrid } = require("../utils/send_email");
 const { BadRequestError, NotFoundError } = require("../errors");
+
+const get = require("lodash/get");
 
 const CreateServices = async (req, res) => {
   const collab = await Collaborator.findById(req.collab);
@@ -82,24 +86,54 @@ const SearchServices = async (req, res) => {
 };
 
 const scheduleServiceHandler = async (req, res) => {
-  const { idService } = req.body;
-  const { _id: idUser } = req.user;
-  const service = await requestService.create({ idService, idUser });
-  const collabId = await Service.findById({ _id: idService }).populate({
-    path: "createdBy",
-    select: "_id",
-  });
+  try {
+    const { idService } = req.body;
+    const { _id: idUser } = req.user;
+    const requestByUser = get(req.user, "request", []);
+    const infoByUser = {
+      request: requestByUser.concat({
+        idService: idService,
+      }),
+    };
+    const userUpdated = await updateUser(idUser, infoByUser);
+    const service = await Service.findById(idService);
+    const emailSend = {
+      to: userUpdated.email,
+      subject: "Servicio Agendado",
+      template_id: process.env.TEMPLATE_REQUEST,
+      dynamic_template_data: {
+        name: userUpdated.name,
+        service: service.services,
+        price: service.price,
+      },
+    };
+    sendEmailSendGrid(emailSend);
 
-  // const emailSend = {
-  //   to: user.email,
-  //   subject: "Servicio Agendado",
-  //   template_id: process.env.TEMPLATE_ID,
-  //   dynamic_template_data: {
-  //     name: user.name,
-  //   },
-  // };
-  // sendEmailSendGrid(emailSend);
-  res.status(StatusCodes.CREATED).json({ collabId });
+    const idCollab = await Service.findById(idService);
+    const collab = await Collaborator.findById(idCollab.createdBy);
+    const requestByCollab = get(collab, "request", []);
+    const infoByCollab = {
+      request: requestByCollab.concat({
+        idUser,
+      }),
+    };
+    const collabUpdated = await updateCollab(idCollab.createdBy, infoByCollab);
+    const serviceCollab = await Service.findById(idService);
+    const emailCollab = {
+      to: collabUpdated.email,
+      subject: "Servicio Agendado",
+      template_id: process.env.TEMPLATE_REQUEST,
+      dynamic_template_data: {
+        name: collabUpdated.name,
+        service: serviceCollab.services,
+        price: serviceCollab.price,
+      },
+    };
+    sendEmailSendGrid(emailCollab);
+    res.status(StatusCodes.CREATED).json({ collabUpdated });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = {
