@@ -2,7 +2,7 @@ const get = require('lodash/get');
 const User = require('../models/users');
 const jwt = require('jsonwebtoken');
 const Collaborator = require('../models/collaborator');
-const { emailCompare } = require('../utils/emailCompare');
+const { emailExist } = require('../utils/emailCompare');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
 const SECRET = process.env.JWT_SECRETS;
@@ -17,13 +17,13 @@ const userRegister = async (req, res) => {
     throw new BadRequestError('Please provide name, lastname, email,password');
   }
 
-  // if (emailCompare(email)) {
-  //   throw new BadRequestError('Email already exists in Collabs');
-  // }
-
-  if (await emailCompare(email)) {
-    throw new BadRequestError('Email already exists in Collabs');
+  if (await emailExist(email)) {
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      msg: 'Email ya se encuentra registrado',
+    });
+    return;
   }
+
   const newUser = req.body;
   const hash = crypto.createHash('sha256').update(newUser.email).digest('hex');
   newUser.passwordResetToken = hash;
@@ -77,8 +77,11 @@ const collaboratorRegister = async (req, res) => {
   if (!name || !email || !password || !lastName || !city) {
     throw new BadRequestError('Please provide name, lastname, email, password');
   }
-  if (await emailCompare(email)) {
-    throw new BadRequestError('Email already exists in Users');
+  if (await emailExist(email)) {
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      msg: 'Email ya se encuentra registrado',
+    });
+    return;
   }
   const newCollaborator = req.body;
   const hash = crypto
@@ -104,32 +107,55 @@ const collaboratorRegister = async (req, res) => {
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    throw new BadRequestError('Please provide email and password');
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      msg: 'Email y Contraseña son requeridos',
+    });
+    return;
   }
   const user = await User.findOne({ email });
   const collaborator = await Collaborator.findOne({ email });
   if (!user && !collaborator) {
-    throw new UnauthenticatedError(
-      'User was not found, credentials are invalid'
-    );
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      msg: 'Email no esta registrado',
+    });
+    return;
   }
   if (user) {
+    if (!user.active) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ msg: 'Aun no has Activado tu cuenta. Revisa tu correo' });
+      return;
+    }
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new UnauthenticatedError('Invalid password');
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        msg: 'Email o Contraseña Invalidos',
+      });
+      return;
     }
-
     const token = user.createJWT(req.body);
     res.status(StatusCodes.OK).json({ user, token });
+    return;
   }
   if (collaborator) {
+    if (!collaborator.active) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ msg: 'Aun no has Activado tu cuenta. Revisa tu correo' });
+      return;
+    }
     const isPasswordCorrectColab = await collaborator.comparePassword(password);
     if (!isPasswordCorrectColab) {
-      throw new UnauthenticatedError('invalid password');
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        msg: 'Email o Contraseña Invalidos',
+      });
+      return;
     }
 
     const token = collaborator.createJWT(req.body);
     res.status(StatusCodes.OK).json({ collaborator, token });
+    return;
   }
 };
 
