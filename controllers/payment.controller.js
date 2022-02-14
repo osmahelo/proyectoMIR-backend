@@ -82,11 +82,11 @@ const createPaymentHandler = async (req, res) => {
     await Payment.create({
       userId: user._id,
       refId: data.recibo,
-      bill: payment.bill,
-      description: payment.description,
-      value: payment.value,
-      tax: payment?.tax,
-      taxBase: payment?.taxbase,
+      bill: data.factura,
+      description: data.descripcion,
+      value: data.valor,
+      tax: data.iva,
+      taxBase: data.valorneto,
     });
 
     res.status(200).json({ data });

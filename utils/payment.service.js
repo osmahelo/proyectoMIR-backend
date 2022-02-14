@@ -22,7 +22,7 @@ const createUser = async (user) => {
 
   return await epayco.customers.create(customerInfo);
 };
-const makePayment = async (user, payment) => {
+const makePayment = async (user, { payment }) => {
   const bill = uuidv4();
   const defaultTokenId = get(user, 'billing.creditCards[0].tokenId');
   const customerId = get(user, 'billing.customerId');
@@ -30,7 +30,7 @@ const makePayment = async (user, payment) => {
   const paymentInfo = {
     token_card: defaultTokenId,
     customer_id: customerId,
-    doc_type: get(payment, 'docType'),
+    doc_type: get(payment, 'doc_type'),
     doc_number: get(payment, 'docNumber'),
     name: get(payment, 'name', user.name),
     last_name: get(payment, 'lastName', user.lastName),
@@ -39,14 +39,15 @@ const makePayment = async (user, payment) => {
     address: get(payment, 'address', 'Calle 53 # 9D - 75'),
     phone: get(payment, 'phone'),
     cell_phone: get(payment, 'cellPhone'),
-    bill: get(payment, 'bill', bill),
-    description: get(payment, 'description'),
-    value: get(payment, 'value'),
-    tax: get(payment, 'tax'),
-    tax_base: get(payment, 'taxBase'),
+    bill,
+    description: 'Pago de servicio FixHogar',
+    value: get(payment, 'value', '50000'),
+    tax: get(payment, 'tax', '0'),
+    tax_base: get(payment, 'taxBase', '50000'),
     currency: get(payment, 'currency', 'COP'),
     dues: get(payment, 'dues', '12'),
   };
+  console.log('Payment Info', paymentInfo);
 
   return await epayco.charge.create(paymentInfo);
 };
