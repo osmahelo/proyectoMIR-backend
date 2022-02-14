@@ -1,4 +1,5 @@
 const Service = require('../models/services');
+const User = require('../models/users');
 const Collaborator = require('../models/collaborator');
 const { updateUser, updateCollab } = require('../controllers/users');
 const { StatusCodes } = require('http-status-codes');
@@ -99,13 +100,18 @@ const SearchServices = async (req, res) => {
 };
 
 const scheduleServiceHandler = async (req, res) => {
+  const { schedule } = req.body;
+  console.log(schedule);
   try {
-    const { idService } = req.body;
+    const { idService } = schedule;
     const { _id: idUser } = req.user;
     const requestByUser = get(req.user, 'request', []);
     const infoByUser = {
       request: requestByUser.concat({
         idService: idService,
+        addressUser: schedule.address,
+        date: schedule.date,
+        phoneUser: schedule.phone,
       }),
     };
     const userUpdated = await updateUser(idUser, infoByUser);
@@ -128,6 +134,9 @@ const scheduleServiceHandler = async (req, res) => {
     const infoByCollab = {
       request: requestByCollab.concat({
         idUser,
+        addressUser: schedule.address,
+        date: schedule.date,
+        phoneUser: schedule.phone,
       }),
     };
     const collabUpdated = await updateCollab(idCollab.createdBy, infoByCollab);
@@ -149,16 +158,30 @@ const scheduleServiceHandler = async (req, res) => {
   }
 };
 
-const GetServicesByUser = async (req, res) => {
+const GetServicesRequests = async (req, res) => {
   try {
-    const { request } = req.user;
-    let id = [];
-    const service = [];
-    for (let i = 0; i <= request.length - 1; i++) {
-      id = request[i];
-      service.push(await Service.findById(id.idService));
+    if (req.user) {
+      const { request: requestUser } = req.user;
+      let id = [];
+      const service = [];
+      for (let i = 0; i <= requestUser.length - 1; i++) {
+        id = requestUser[i];
+        service.push(await Service.findById(id.idService));
+      }
+      return res.status(201).json(service);
     }
-    return res.status(201).json(service);
+    if (req.collab) {
+      const { request: requestCollab } = req.collab;
+      console.log(requestCollab);
+      let id = [];
+      const service = [];
+      for (let i = 0; i <= requestCollab.length - 1; i++) {
+        id = requestCollab[i];
+        service.push(await User.findById(id.idUser));
+        service.push(requestCollab[i]);
+      }
+      return res.status(201).json(service);
+    }
   } catch (error) {
     console.log(error);
   }
@@ -171,7 +194,7 @@ module.exports = {
   UpdateService,
   DeleteService,
   GetServicesByCollab,
-  GetServicesByUser,
+  GetServicesRequests,
   SearchServices,
   scheduleServiceHandler,
 };

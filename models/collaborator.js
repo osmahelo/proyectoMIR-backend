@@ -6,9 +6,13 @@ const requestService = new mongoose.Schema(
   {
     idUser: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
+    addressUser: { type: String, required: true },
+    date: { type: Date, required: true },
+    phoneUser: { type: String, required: true },
+    payment:{type:Boolean, default:false}
   },
   { _id: false }
 );
