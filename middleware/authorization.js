@@ -30,6 +30,7 @@ const isAuthenticated = (req, res, next) => {
       return res.status(500).json({ msg: 'No Token provided' });
     }
     const token = authHeader.split(' ')[1];
+    console.log(token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await getUserbyEmail(decoded.email);
     const collab = await getCollabByEmail(decoded.email);
