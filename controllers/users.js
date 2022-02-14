@@ -106,6 +106,7 @@ const collaboratorRegister = async (req, res) => {
 
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body);
   if (!email || !password) {
     res.status(StatusCodes.UNAUTHORIZED).json({
       msg: 'Email y Contraseña son requeridos',
@@ -135,6 +136,7 @@ const userLogin = async (req, res) => {
       return;
     }
     const token = user.createJWT(req.body);
+    console.log('Session Login', token);
     res.status(StatusCodes.OK).json({ user, token });
     return;
   }

@@ -1,6 +1,6 @@
-const bcrypt = require("bcryptjs");
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const cardSchema = new mongoose.Schema(
   {
@@ -45,31 +45,35 @@ const requestService = new mongoose.Schema(
   {
     idService: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Services",
+      ref: 'Services',
       required: true,
     },
+    addressUser: { type: String, required: true },
+    date: { type: Date, required: true },
+    phoneUser: { type: String, required: true },
+    payment:{type:Boolean, default:false}
   },
   { _id: false }
 );
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: [true, "Name is required"], minlength: 4 },
+    name: { type: String, required: [true, 'Name is required'], minlength: 4 },
     lastName: {
       type: String,
-      required: [true, "Last Name is required"],
+      required: [true, 'Last Name is required'],
       minlength: 4,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: [true, 'Email is required'],
       match: [
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        "Please provide a valid email",
+        'Please provide a valid email',
       ],
       unique: true,
     },
-    password: { type: String, required: [true, "Password is required"] },
+    password: { type: String, required: [true, 'Password is required'] },
     city: { type: String },
     address: { type: String },
     phone: { type: Number, minlength: 10, maxlength: 10 },
@@ -77,7 +81,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
       default:
-        "http://res.cloudinary.com/lauracanon/image/upload/v1644268959/yqjrfjunz7xv6qa0ng5z.png",
+        'http://res.cloudinary.com/lauracanon/image/upload/v1644268959/yqjrfjunz7xv6qa0ng5z.png',
     },
     active: { type: Boolean, default: false },
     passwordResetToken: String,
@@ -90,7 +94,7 @@ const userSchema = new mongoose.Schema(
 );
 
 //Encriptación password
-userSchema.pre("save", async function () {
+userSchema.pre('save', async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -105,4 +109,4 @@ userSchema.methods.comparePassword = async function (passwordCheck) {
   return isMatch;
 };
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);
