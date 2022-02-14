@@ -6,7 +6,6 @@ const compose = require('composable-middleware');
 const getUserbyEmail = async (email) => {
   try {
     const user = await User.findOne({ email });
-    console.log('getEmail', email);
     if (user) {
       return user;
     }
@@ -32,7 +31,6 @@ const isAuthenticated = (req, res, next) => {
     }
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('decoded', decoded);
     const user = await getUserbyEmail(decoded.email);
     const collab = await getCollabByEmail(decoded.email);
     if (!user && !collab) {

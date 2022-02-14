@@ -101,7 +101,7 @@ const SearchServices = async (req, res) => {
 
 const scheduleServiceHandler = async (req, res) => {
   const { schedule } = req.body;
-  console.log(schedule);
+  console.log(req.user);
   try {
     const { idService } = schedule;
     const { _id: idUser } = req.user;
@@ -172,14 +172,13 @@ const GetServicesRequests = async (req, res) => {
     }
     if (req.collab) {
       const { request: requestCollab } = req.collab;
-      console.log(requestCollab);
       let id = [];
       const service = [];
       for (let i = 0; i <= requestCollab.length - 1; i++) {
         id = requestCollab[i];
         service.push(await User.findById(id.idUser));
-        service.push(requestCollab[i]);
       }
+      console.log(service);
       return res.status(201).json(service);
     }
   } catch (error) {

@@ -136,7 +136,6 @@ const userLogin = async (req, res) => {
       return;
     }
     const token = user.createJWT(req.body);
-    console.log('Session Login', token);
     res.status(StatusCodes.OK).json({ user, token });
     return;
   }
