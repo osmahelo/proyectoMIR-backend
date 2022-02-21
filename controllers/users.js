@@ -35,27 +35,23 @@ const userRegister = async (req, res) => {
     template_id: process.env.TEMPLATE_ID,
     dynamic_template_data: {
       name: user.name,
-      url: `http://localhost:3000/activate/${user.passwordResetToken}/${user._id}`,
+      url: `https://fixhogar.netlify.app/activate/${user.passwordResetToken}/${user._id}`,
     },
   };
   sendEmailSendGrid(emailSend);
   res.status(StatusCodes.CREATED).json({ user });
 };
 
-const updateUser = async (user, image) => {
-  const updatedUser = await User.findByIdAndUpdate(user._id, image, {
+const updateUser = async (user, data) => {
+  const updatedUser = await User.findByIdAndUpdate(user._id, data, {
     new: true,
   });
   return updatedUser;
 };
-const updateCollab = async (collab, image) => {
-  const updatedCollab = await Collaborator.findByIdAndUpdate(
-    collab._id,
-    image,
-    {
-      new: true,
-    }
-  );
+const updateCollab = async (collab, data) => {
+  const updatedCollab = await Collaborator.findByIdAndUpdate(collab._id, data, {
+    new: true,
+  });
   return updatedCollab;
 };
 const addBillingCustomerId = async (user, customerId) => {
@@ -97,7 +93,7 @@ const collaboratorRegister = async (req, res) => {
     template_id: process.env.TEMPLATE_ID,
     dynamic_template_data: {
       name: collaborator.name,
-      url: `http://localhost:3000/activate/${collaborator.passwordResetToken}/${collaborator._id}`,
+      url: `https://fixhogar.netlify.app/activate/${collaborator.passwordResetToken}/${collaborator._id}`,
     },
   };
   sendEmailSendGrid(emailSend);
