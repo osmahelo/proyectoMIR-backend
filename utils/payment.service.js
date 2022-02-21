@@ -9,7 +9,8 @@ const epayco = require('epayco-sdk-node')({
 });
 
 const createCardToken = async (creditCardInfo) => {
-  return await epayco.token.create(creditCardInfo);
+  const cardRegistered = await epayco.token.create(creditCardInfo);
+  return cardRegistered;
 };
 const createUser = async (user) => {
   const customerInfo = {
@@ -22,7 +23,7 @@ const createUser = async (user) => {
 
   return await epayco.customers.create(customerInfo);
 };
-const makePayment = async (user, { payment }) => {
+const makePayment = async (user, payment) => {
   const bill = uuidv4();
   const defaultTokenId = get(user, 'billing.creditCards[0].tokenId');
   const customerId = get(user, 'billing.customerId');
@@ -41,9 +42,9 @@ const makePayment = async (user, { payment }) => {
     cell_phone: get(payment, 'cellPhone'),
     bill,
     description: 'Pago de servicio FixHogar',
-    value: get(payment, 'value', '50000'),
+    value: get(payment, 'value'),
     tax: get(payment, 'tax', '0'),
-    tax_base: get(payment, 'taxBase', '50000'),
+    tax_base: get(payment, 'taxBase'),
     currency: get(payment, 'currency', 'COP'),
     dues: get(payment, 'dues', '12'),
   };

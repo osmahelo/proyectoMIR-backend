@@ -8,27 +8,45 @@ const { BadRequestError, NotFoundError } = require('../errors');
 const get = require('lodash/get');
 
 const CreateServices = async (req, res) => {
+  const { _id } = req.collab;
   try {
     const { description, price, services } = req.body;
-    if (!description || !price || !services) {
-      throw new BadRequestError(
-        'Please provide Service, descripction, city, price'
-      );
-    }
+    // if (!description || !price || !services) {
+    //   res
+    //     .status(StatusCodes.BAD_REQUEST)
+    //     .json({ msg: 'Todos los campos son requeridos' });
+    //   return;
+    // }
 
+    const serviceExist = await Service.find({});
+    for (let i = 0; i <= serviceExist.length - 1; i++) {
+      if (
+        serviceExist[i].services === services &&
+        serviceExist[i].createdBy.toString() === _id.toString()
+      ) {
+        console.log('Ambos Existen');
+        res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ msg: 'Ya has Credado un servicio para esa Categoria' });
+        return;
+      }
+    }
+    console.log('Creando servicio diferente');
     const service = await Service.create({
       ...req.body,
       city: req.collab.city,
       createdBy: req.collab._id,
     });
-    const collaborator = await Collaborator.findByIdAndUpdate(
+    await Collaborator.findByIdAndUpdate(
       req.collab.id,
       {
         services: service,
       },
       { new: true }
     );
-    res.status(StatusCodes.CREATED).json({ service, collaborator });
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ msg: 'Servicio creado con exito' });
   } catch (error) {
     console.log(error);
   }
@@ -79,7 +97,7 @@ const DeleteService = async (req, res) => {
   if (!service) {
     res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ msg: 'No se encontre el Servicio' });
+      .json({ msg: 'No se encontro el Servicio' });
     return;
   }
   res.status(StatusCodes.OK).json({ msg: 'Servicio Eliminado' });
@@ -101,58 +119,71 @@ const SearchServices = async (req, res) => {
 
 const scheduleServiceHandler = async (req, res) => {
   const { schedule } = req.body;
-  console.log(req.user);
   try {
     const { idService } = schedule;
+    const { user } = req;
     const { _id: idUser } = req.user;
-    const requestByUser = get(req.user, 'request', []);
-    const infoByUser = {
-      request: requestByUser.concat({
-        idService: idService,
-        addressUser: schedule.address,
-        date: schedule.date,
-        phoneUser: schedule.phone,
-      }),
-    };
-    const userUpdated = await updateUser(idUser, infoByUser);
     const service = await Service.findById(idService);
-    const emailSend = {
-      to: userUpdated.email,
-      subject: 'Servicio Agendado',
-      template_id: process.env.TEMPLATE_REQUEST,
-      dynamic_template_data: {
-        name: userUpdated.name,
-        service: service.services,
-        price: service.price,
-      },
-    };
-    sendEmailSendGrid(emailSend);
-
-    const idCollab = await Service.findById(idService);
-    const collab = await Collaborator.findById(idCollab.createdBy);
+    const collab = await Collaborator.findById(service.createdBy);
     const requestByCollab = get(collab, 'request', []);
-    const infoByCollab = {
-      request: requestByCollab.concat({
-        idUser,
-        addressUser: schedule.address,
-        date: schedule.date,
-        phoneUser: schedule.phone,
-      }),
+
+    const request = {
+      idService: idService,
+      idCollab: collab._id,
+      addressUser: schedule.address,
+      date: schedule.date,
+      phoneUser: schedule.phone,
     };
-    const collabUpdated = await updateCollab(idCollab.createdBy, infoByCollab);
-    const serviceCollab = await Service.findById(idService);
-    const emailCollab = {
-      to: collabUpdated.email,
-      subject: 'Servicio Agendado',
-      template_id: process.env.TEMPLATE_REQUEST,
-      dynamic_template_data: {
-        name: collabUpdated.name,
-        service: serviceCollab.services,
-        price: serviceCollab.price,
-      },
-    };
-    sendEmailSendGrid(emailCollab);
-    res.status(StatusCodes.CREATED).json({ collabUpdated });
+
+    const userUpdated = await User.updateOne(
+      { _id: idUser, 'request.idService': { $nin: [request.idService] } },
+      { $push: { request: request } },
+      { upsert: false }
+    );
+
+    if (userUpdated.modifiedCount === 1) {
+      const emailSend = {
+        to: user.email,
+        subject: 'Servicio Agendado',
+        template_id: process.env.TEMPLATE_REQUEST,
+        dynamic_template_data: {
+          name: user.name,
+          service: service.services,
+          price: service.price,
+        },
+      };
+      sendEmailSendGrid(emailSend);
+      const infoByCollab = {
+        request: requestByCollab.concat({
+          idUser,
+          idService,
+          addressUser: schedule.address,
+          date: schedule.date,
+          phoneUser: schedule.phone,
+        }),
+      };
+      await updateCollab(service.createdBy, infoByCollab);
+      const emailCollab = {
+        to: collab.email,
+        subject: 'Servicio Agendado',
+        template_id: process.env.TEMPLATE_REQUEST,
+        dynamic_template_data: {
+          name: collab.name,
+          service: service.services,
+          price: service.price,
+        },
+      };
+      sendEmailSendGrid(emailCollab);
+      console.log('Servicio agendado');
+      return res
+        .status(StatusCodes.CREATED)
+        .json({ msg: 'El Servicio fue Agendado Correctamente' });
+    } else if (userUpdated.modifiedCount === 0) {
+      console.log('Servicio Existente');
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ msg: 'El Servicio ya se encuentra Agendado' });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -165,8 +196,23 @@ const GetServicesRequests = async (req, res) => {
       let id = [];
       const service = [];
       for (let i = 0; i <= requestUser.length - 1; i++) {
+        const { idService } = requestUser[i];
+        const serviceRequest = await Service.findById(idService);
+        let requestService = {};
         id = requestUser[i];
-        service.push(await Service.findById(id.idService));
+        const { name, lastName } = await Collaborator.findById(id.idCollab);
+        requestService = {
+          name,
+          lastName,
+          service: serviceRequest.services,
+          idService,
+          price: serviceRequest.price,
+          address: requestUser[i].addressUser,
+          date: requestUser[i].date.toISOString().substring(0, 10),
+          payment: requestUser[i].payment,
+          idCollab: id.idCollab,
+        };
+        service.push(requestService);
       }
       return res.status(201).json(service);
     }
@@ -175,10 +221,23 @@ const GetServicesRequests = async (req, res) => {
       let id = [];
       const service = [];
       for (let i = 0; i <= requestCollab.length - 1; i++) {
+        const { idService } = requestCollab[i];
+        const serviceRequest = await Service.findById(idService);
+        let requestService = {};
         id = requestCollab[i];
-        service.push(await User.findById(id.idUser));
+        const { name, lastName } = await User.findById(id.idUser);
+        requestService = {
+          name,
+          lastName,
+          service: serviceRequest.services,
+          price: serviceRequest.price,
+          address: requestCollab[i].addressUser,
+          date: requestCollab[i].date.toISOString().substring(0, 10),
+          phone: requestCollab[i].phoneUser,
+          payment: requestCollab[i].payment,
+        };
+        service.push(requestService);
       }
-      console.log(service);
       return res.status(201).json(service);
     }
   } catch (error) {
