@@ -25,22 +25,25 @@ const getCollabByEmail = async (email) => {
 };
 const isAuthenticated = (req, res, next) => {
   return compose().use(async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(500).json({ msg: 'No Token provided' });
-    }
-    const token = authHeader.split(' ')[1];
-    console.log(token);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await getUserbyEmail(decoded.email);
-    const collab = await getCollabByEmail(decoded.email);
-    if (!user && !collab) {
-      return res.status(500).json({ msg: 'Not authorized' });
-    }
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(500).json({ msg: 'No Token provided' });
+      }
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = user;
-    req.collab = collab;
-    next();
+      const user = await getUserbyEmail(decoded.email);
+      const collab = await getCollabByEmail(decoded.email);
+      if (!user && !collab) {
+        return res.status(500).json({ msg: 'Not authorized' });
+      }
+
+      req.user = user;
+      req.collab = collab;
+      next();
+    } catch (error) {
+    }
   });
 };
 

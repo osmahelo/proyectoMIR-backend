@@ -5,15 +5,33 @@ const {
   makePayment,
 } = require('../utils/payment.service');
 const Payment = require('../models/payment');
-const { updateUser, addBillingCustomerId } = require('../controllers/users');
+const User = require('../models/users');
+const Collaborator = require('../models/collaborator');
+const {
+  updateUser,
+  updateCollab,
+  addBillingCustomerId,
+} = require('../controllers/users');
 const get = require('lodash/get');
+const { StatusCodes } = require('http-status-codes');
 
+const getCreditCards = async (req, res) => {
+  const { user } = req;
+  if (!user.billing.creditCards) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ msg: 'Usuario sin Tarjetas de Credito' });
+  } else {
+    return res.status(StatusCodes.OK).json(user.billing.creditCards);
+  }
+};
 const createCardTokenHandler = async (req, res) => {
   const {
     numberCard: cardnumber,
     expYear: cardExp_year,
     expMonth: cardExp_month,
     cvc: cardCvc,
+    holder,
   } = req.body;
   console.log(req.body);
   const creditinfo = {
@@ -24,7 +42,8 @@ const createCardTokenHandler = async (req, res) => {
   };
 
   try {
-    const { card, id, status } = await createCardToken(creditinfo);
+    const cardRegistered = await createCardToken(creditinfo);
+    const { card, id, data } = cardRegistered;
     console.log('tokenId', id);
     const user = req.user;
 
@@ -38,13 +57,14 @@ const createCardTokenHandler = async (req, res) => {
           name: card.name,
           mask: card.mask,
           tokenId: id,
+          holderCard: holder,
         }),
       },
     };
 
     await updateUser(req.user._id, customer);
-    console.log(status);
-    res.status(200).json(status);
+    console.log(data);
+    res.status(200).json({ status: true });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: ' Epayco token card error', error });
@@ -65,20 +85,13 @@ const createCustomerHandler = async (req, res) => {
 };
 
 const createPaymentHandler = async (req, res) => {
-  console.log(req.user);
-  console.log(req.body);
+  const { user } = req;
+  const { payment } = req.body;
   try {
-    const { user, body: payment } = req;
     const { data, success } = await makePayment(user, payment);
-
     if (!success) {
       return res.status(400).json(data);
     }
-    if (!user.billing.customerId) {
-      //registrar ususario
-      //1.regsitrar tarjeta
-    }
-
     await Payment.create({
       userId: user._id,
       refId: data.recibo,
@@ -88,7 +101,16 @@ const createPaymentHandler = async (req, res) => {
       tax: data.iva,
       taxBase: data.valorneto,
     });
-
+    await User.updateOne(
+      { _id: user._id, 'payment.idService': payment.idService },
+      { $set: { 'request.$[id].payment': true } },
+      { arrayFilters: [{ 'id.idService': payment.idService }] }
+    );
+    await Collaborator.updateOne(
+      { _id: payment.idCollab, 'payment.idService': payment.idService },
+      { $set: { 'request.$[id].payment': true } },
+      { arrayFilters: [{ 'id.idService': payment.idService }] }
+    );
     res.status(200).json({ data });
   } catch (error) {
     console.log(error);
@@ -100,4 +122,5 @@ module.exports = {
   createCardTokenHandler,
   createCustomerHandler,
   createPaymentHandler,
+  getCreditCards,
 };

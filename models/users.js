@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const cardSchema = new mongoose.Schema(
   {
+    holderCard: { type: String, required: true },
     expMonth: {
       type: String,
       required: true,
@@ -48,10 +49,15 @@ const requestService = new mongoose.Schema(
       ref: 'Services',
       required: true,
     },
-    addressUser: { type: String, required: true },
-    date: { type: Date, required: true },
-    phoneUser: { type: String, required: true },
-    payment:{type:Boolean, default:false}
+    idCollab: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Collaborator',
+      required: true,
+    },
+    addressUser: { type: String, required: false },
+    date: { type: Date, required: false },
+    phoneUser: { type: String, required: false },
+    payment: { type: Boolean, default: false },
   },
   { _id: false }
 );
