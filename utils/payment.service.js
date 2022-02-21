@@ -13,11 +13,6 @@ const createCardToken = async (creditCardInfo) => {
   return cardRegistered;
 };
 const createUser = async (user) => {
-  console.log(
-    `🤖 ~ file: payment.service.js ~ line 15 ~ createUser ~ user`,
-    user
-  );
-  debugger;
   const customerInfo = {
     token_card: user?.billing?.creditCards?.[0]?.tokenId,
     name: user.name,

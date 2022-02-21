@@ -63,7 +63,6 @@ const createCardTokenHandler = async (req, res) => {
     };
 
     await updateUser(req.user._id, customer);
-    console.log(data);
     res.status(200).json({ status: true });
   } catch (error) {
     console.log(error);

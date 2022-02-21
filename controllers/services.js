@@ -212,10 +212,6 @@ const GetServicesRequests = async (req, res) => {
           payment: requestUser[i].payment,
           idCollab: id.idCollab,
         };
-        console.log(
-          `🤖 ~ file: services.js ~ line 205 ~ GetServicesRequests ~ requestService`,
-          requestService
-        );
         service.push(requestService);
       }
       return res.status(201).json(service);

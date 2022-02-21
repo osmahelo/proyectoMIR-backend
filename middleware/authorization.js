@@ -43,6 +43,7 @@ const isAuthenticated = (req, res, next) => {
       req.collab = collab;
       next();
     } catch (error) {
+      console.log(error);
     }
   });
 };
